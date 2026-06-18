@@ -68,11 +68,13 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled, studen
             <Camera size={28} className="text-muted mb-1" />
             <span className="text-xs text-sec">Tomar foto</span>
           </button>
-          <button onClick={() => galleryRef.current?.click()}
-            className="flex-1 flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg border-border bg-bg hover:border-accent hover:bg-accent/5 transition-colors cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" className="text-muted mb-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <span className="text-xs text-sec">Subir de galeria</span>
-          </button>
+          {!studentMode && (
+            <button onClick={() => galleryRef.current?.click()}
+              className="flex-1 flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg border-border bg-bg hover:border-accent hover:bg-accent/5 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" className="text-muted mb-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span className="text-xs text-sec">Subir de galeria</span>
+            </button>
+          )}
           <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handleFile} disabled={uploading || disabled} className="hidden" />
           <input ref={galleryRef} type="file" accept="image/*" onChange={handleFile} disabled={uploading || disabled} className="hidden" />
         </div>
