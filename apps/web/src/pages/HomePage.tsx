@@ -109,6 +109,24 @@ export default function HomePage() {
             <GoogleLoginButton onSuccess={login} />
           )}
         </div>
+        {/* Dev role switcher */}
+        <div className="border-t border-dashed border-border px-3 py-2 bg-bg/50">
+          <p className="text-[10px] text-muted uppercase tracking-wider mb-1.5">Modo prueba</p>
+          <div className="flex gap-1">
+            <button onClick={() => { localStorage.setItem('mock_user', JSON.stringify({ role: 'ARRIENDADOR', name: 'Test Arrendador', email: 'test@arrendador.com', picture: '', id: 'mock-1' })); window.location.reload() }}
+              className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${user?.role === 'ARRIENDADOR' ? 'bg-accent text-white' : 'bg-white text-sec border border-border hover:border-accent'}`}>
+              Arrendador
+            </button>
+            <button onClick={() => { localStorage.setItem('mock_user', JSON.stringify({ role: 'ESTUDIANTE', name: 'Test Estudiante', email: 'test@estudiante.com', picture: '', id: 'mock-2' })); window.location.reload() }}
+              className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${user?.role === 'ESTUDIANTE' ? 'bg-accent text-white' : 'bg-white text-sec border border-border hover:border-accent'}`}>
+              Estudiante
+            </button>
+            <button onClick={() => { localStorage.removeItem('mock_user'); window.location.reload() }}
+              className="text-xs py-1.5 px-2 rounded-md border border-border text-sec hover:bg-white transition-colors">
+              X
+            </button>
+          </div>
+        </div>
       </aside>
 
       {/* ===== MAIN CONTENT ===== */}

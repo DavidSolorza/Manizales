@@ -18,6 +18,14 @@ export function useAuth() {
   })
 
   useEffect(() => {
+    // Dev mock user
+    const mockRaw = localStorage.getItem('mock_user')
+    if (mockRaw) {
+      const mockUser = JSON.parse(mockRaw)
+      setState({ user: mockUser, isLoading: false, error: null, needsRole: false })
+      return
+    }
+
     const token = localStorage.getItem('token')
     if (token) {
       setAuthToken(token)
@@ -53,6 +61,7 @@ export function useAuth() {
 
   const logout = useCallback(() => {
     localStorage.removeItem('token')
+    localStorage.removeItem('mock_user')
     setAuthToken(null)
     setState({ user: null, isLoading: false, error: null, needsRole: false })
   }, [])
