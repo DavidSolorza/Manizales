@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, ForbiddenException } from '@nestjs/common'
 import { ListingService } from '../application/services/listing.service'
 import { CreateListingDto } from './dtos/create-listing.dto'
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard'
@@ -23,15 +23,36 @@ export class ListingsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('admin/pending')
+  async findPending() {
+    return this.listingService.findPending()
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() dto: CreateListingDto, @CurrentUser('id') userId: string) {
-    return this.listingService.create({ ...dto, userId })
+  async create(@Body() dto: CreateListingDto, @CurrentUser() user: any) {
+    return this.listingService.create({ ...dto, userId: user.id, role: user.role })
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateListingDto>, @CurrentUser('id') userId: string) {
     return this.listingService.update(id, dto, userId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/approve')
+  async approve(@Param('id') id: string, @CurrentUser() user: any) {
+    if (user.role !== 'SUPER_ADMIN') throw new ForbiddenException('Only super admin can approve')
+    return this.listingService.approve(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/reject')
+  async reject(@Param('id') id: string, @CurrentUser() user: any) {
+    if (user.role !== 'SUPER_ADMIN') throw new ForbiddenException('Only super admin can reject')
+    await this.listingService.reject(id)
+    return { message: 'Rejected' }
   }
 
   @UseGuards(JwtAuthGuard)

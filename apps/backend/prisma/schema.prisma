@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   ARRIENDADOR
   ESTUDIANTE
+  SUPER_ADMIN
 }
 
 model User {

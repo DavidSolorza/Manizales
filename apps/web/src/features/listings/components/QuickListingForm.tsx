@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Camera, MapPin, Loader2 } from 'lucide-react'
+import { Camera, Loader2 } from 'lucide-react'
 import type { CreateListingInput } from '@proyecto/api-client'
 import { apiUpload } from '@proyecto/api-client'
 import MapView from '../../map/components/MapView'
@@ -8,9 +8,10 @@ interface Props {
   onSubmit: (data: CreateListingInput) => Promise<void>
   isLoading: boolean
   disabled?: boolean
+  studentMode?: boolean
 }
 
-export default function QuickListingForm({ onSubmit, isLoading, disabled }: Props) {
+export default function QuickListingForm({ onSubmit, isLoading, disabled, studentMode }: Props) {
   const [imageUrl, setImageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
   const [lat, setLat] = useState(5.07)
@@ -33,8 +34,8 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled }: Prop
   const handlePublish = async () => {
     if (!imageUrl) return
     await onSubmit({
-      title: 'Habitacion en Manizales',
-      description: 'Publicacion rapida',
+      title: studentMode ? 'Reporte estudiante' : 'Habitacion en Manizales',
+      description: studentMode ? 'Lugar reportado por un estudiante' : 'Publicacion rapida',
       price: 300000,
       type: 'habitacion',
       bedrooms: 1,
@@ -46,9 +47,12 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled }: Prop
     })
   }
 
+  const btnLabel = studentMode ? 'Enviar para revision' : 'Publicar rapido'
+  const disabledLabel = studentMode ? 'Subi una foto primero' : 'Inicia sesion primero'
+
   return (
     <div className="bg-surface rounded-xl border border-border p-6 space-y-5">
-      <p className="text-sm text-sec">Subí una foto del lugar, marcá la ubicacion en el mapa y publicamos al instante</p>
+      <p className="text-sm text-sec">{studentMode ? 'Subi la foto del lugar que viste y marcala en el mapa' : 'Subi una foto del lugar, marca la ubicacion en el mapa y publicamos al instante'}</p>
 
       <label className={`flex items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${imageUrl ? 'border-accent bg-accent/5' : 'border-border bg-bg hover:border-accent'}`}>
         {imageUrl ? (
@@ -75,7 +79,7 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled }: Prop
         className="w-full py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent-hover disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
       >
         {isLoading ? <Loader2 size={18} className="animate-spin" /> : null}
-        {disabled ? 'Inicia sesion primero' : isLoading ? 'Publicando...' : 'Publicar rapido'}
+        {isLoading ? 'Enviando...' : !imageUrl ? disabledLabel : btnLabel}
       </button>
     </div>
   )

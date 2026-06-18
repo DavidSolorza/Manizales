@@ -1,5 +1,5 @@
 export { apiRequest, apiUpload, setAuthToken, getAuthToken } from './http-client'
 export { loginWithGoogle, getProfile, setUserRole } from './auth.api'
 export type { LoginResponse, UserDTO } from './auth.api'
-export { createListing, searchListings, getListingById, updateListing, deleteListing } from './listings.api'
+export { createListing, searchListings, getListingById, updateListing, deleteListing, getPendingListings, approveListing, rejectListing } from './listings.api'
 export type { ListingDTO, CreateListingInput, SearchFilters } from './listings.api'

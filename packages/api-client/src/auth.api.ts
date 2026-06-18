@@ -5,7 +5,7 @@ export interface UserDTO {
   name: string
   email: string
   picture: string
-  role: 'ARRIENDADOR' | 'ESTUDIANTE' | null
+  role: 'ARRIENDADOR' | 'ESTUDIANTE' | 'SUPER_ADMIN' | null
 }
 
 export interface LoginResponse {

@@ -6,8 +6,8 @@ export class SetRoleUseCase {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(userId: string, role: string) {
-    if (role !== 'ARRIENDADOR' && role !== 'ESTUDIANTE') {
-      throw new BadRequestException('Rol invalido. Debe ser ARRIENDADOR o ESTUDIANTE')
+    if (role !== 'ARRIENDADOR' && role !== 'ESTUDIANTE' && role !== 'SUPER_ADMIN') {
+      throw new BadRequestException('Rol invalido')
     }
     const user = await this.prisma.user.update({
       where: { id: userId },

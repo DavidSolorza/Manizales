@@ -73,3 +73,15 @@ export async function updateListing(id: string, data: Partial<CreateListingInput
 export async function deleteListing(id: string): Promise<void> {
   return apiRequest<void>(`/listings/${id}`, { method: 'DELETE' })
 }
+
+export async function getPendingListings(): Promise<ListingDTO[]> {
+  return apiRequest<ListingDTO[]>('/listings/pending')
+}
+
+export async function approveListing(id: string): Promise<ListingDTO> {
+  return apiRequest<ListingDTO>(`/listings/${id}/approve`, { method: 'PATCH' })
+}
+
+export async function rejectListing(id: string): Promise<void> {
+  return apiRequest<void>(`/listings/${id}/reject`, { method: 'PATCH' })
+}

@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useListings, useAuth, useSearchFilters } from '@proyecto/hooks'
+import { useListings, useAuth, useSearchFilters, usePendingListings } from '@proyecto/hooks'
 import { Link } from 'react-router-dom'
-import { House, Search, Star, ClipboardList, DollarSign, X, Menu, SlidersHorizontal } from 'lucide-react'
+import { House, Search, Star, ClipboardList, DollarSign, X, Menu, SlidersHorizontal, Eye, Check, Trash2 } from 'lucide-react'
+import { approveListing, rejectListing } from '@proyecto/api-client'
 import ListingCard from '../features/listings/components/ListingCard'
 import SkeletonCard from '../features/listings/components/SkeletonCard'
 import MapView from '../features/map/components/MapView'
@@ -9,7 +10,7 @@ import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
 import RoleSelector from '../features/auth/components/RoleSelector'
 import NavItem from '../features/ui/components/NavItem'
 
-type NavItem = 'inicio' | 'favoritos' | 'mis-lugares' | 'precios'
+type NavItem = 'inicio' | 'favoritos' | 'mis-lugares' | 'precios' | 'pendientes'
 
 const NAV_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
   { key: 'inicio', label: 'Inicio', icon: House },
@@ -24,12 +25,17 @@ const STUDENT_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
   { key: 'favoritos', label: 'Favoritos', icon: Star },
 ]
 
+const ADMIN_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
+  { key: 'pendientes', label: 'Pendientes', icon: Eye },
+]
+
 const TYPE_OPTIONS = ['habitacion', 'apartamento', 'casa']
 
 export default function HomePage() {
   const { user, login, logout, needsRole, setRole } = useAuth()
   const { filters, setQuery, setPriceRange, setType, reset } = useSearchFilters()
   const { listings, isLoading } = useListings(filters)
+  const { listings: pending, isLoading: pendingLoading, refetch: refetchPending } = usePendingListings()
   const [activeNav, setActiveNav] = useState<NavItem>('inicio')
   const [showFilters, setShowFilters] = useState(false)
   const [showMobileNav, setShowMobileNav] = useState(false)
@@ -42,6 +48,19 @@ export default function HomePage() {
     const el = document.getElementById(`listing-${id}`)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
+
+  const handleApprove = async (id: string) => {
+    await approveListing(id)
+    refetchPending()
+  }
+
+  const handleReject = async (id: string) => {
+    await rejectListing(id)
+    refetchPending()
+  }
+
+  const isStudent = user?.role === 'ESTUDIANTE'
+  const isAdmin = user?.role === 'SUPER_ADMIN'
 
   return (
     <div className="h-screen flex flex-col lg:flex-row overflow-hidden">
@@ -59,7 +78,7 @@ export default function HomePage() {
         <div className="px-4 py-5 border-b border-border">
           <h1 className="font-display font-bold text-base text-tinta">Arriendos U</h1>
         </div>
-        {user?.role === 'ARRIENDADOR' && (
+        {(user?.role === 'ARRIENDADOR' || isAdmin) && (
           <div className="px-3 pt-4 pb-2">
             <Link to="/create"
               className="flex items-center justify-center gap-2 w-full py-2.5 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors"
@@ -76,7 +95,16 @@ export default function HomePage() {
           ))}
         </div>
         <div className="mx-3 my-2 border-t border-border" />
-        {user?.role === 'ARRIENDADOR' ? (
+        {isAdmin ? (
+          <div className="px-3 pb-1">
+            <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Admin</p>
+            {ADMIN_ITEMS.map((item) => (
+              <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
+                badge={pending.length}
+                onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }} />
+            ))}
+          </div>
+        ) : user?.role === 'ARRIENDADOR' ? (
           <div className="px-3 pb-1">
             <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Tus publicaciones</p>
             {OWNER_ITEMS.map((item) => (
@@ -85,7 +113,7 @@ export default function HomePage() {
                 onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }} />
             ))}
           </div>
-        ) : (
+        ) : isStudent && (
           <div className="px-3 pb-1">
             <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Guardados</p>
             {STUDENT_ITEMS.map((item) => (
@@ -103,7 +131,7 @@ export default function HomePage() {
                 <p className="text-sm font-medium text-tinta truncate">{user.name}</p>
                 <p className="text-xs text-sec truncate">{user.email}</p>
               </div>
-              <button onClick={logout} className="text-sec hover:text-red-500 transition-colors" title="Cerrar sesión"><X size={16} /></button>
+              <button onClick={logout} className="text-sec hover:text-red-500 transition-colors" title="Cerrar sesion"><X size={16} /></button>
             </div>
           ) : (
             <GoogleLoginButton onSuccess={login} />
@@ -112,13 +140,17 @@ export default function HomePage() {
         {/* Dev role switcher */}
         <div className="border-t border-dashed border-border px-3 py-2 bg-bg/50">
           <p className="text-[10px] text-muted uppercase tracking-wider mb-1.5">Modo prueba</p>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
+            <button onClick={() => { localStorage.setItem('mock_user', JSON.stringify({ role: 'SUPER_ADMIN', name: 'Super Admin', email: 'admin@arriendosu.com', picture: '', id: 'mock-admin' })); window.location.reload() }}
+              className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${isAdmin ? 'bg-accent text-white' : 'bg-white text-sec border border-border hover:border-accent'}`}>
+              Admin
+            </button>
             <button onClick={() => { localStorage.setItem('mock_user', JSON.stringify({ role: 'ARRIENDADOR', name: 'Test Arrendador', email: 'test@arrendador.com', picture: '', id: 'mock-1' })); window.location.reload() }}
               className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${user?.role === 'ARRIENDADOR' ? 'bg-accent text-white' : 'bg-white text-sec border border-border hover:border-accent'}`}>
               Arrendador
             </button>
             <button onClick={() => { localStorage.setItem('mock_user', JSON.stringify({ role: 'ESTUDIANTE', name: 'Test Estudiante', email: 'test@estudiante.com', picture: '', id: 'mock-2' })); window.location.reload() }}
-              className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${user?.role === 'ESTUDIANTE' ? 'bg-accent text-white' : 'bg-white text-sec border border-border hover:border-accent'}`}>
+              className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${isStudent ? 'bg-accent text-white' : 'bg-white text-sec border border-border hover:border-accent'}`}>
               Estudiante
             </button>
             <button onClick={() => { localStorage.removeItem('mock_user'); window.location.reload() }}
@@ -140,18 +172,22 @@ export default function HomePage() {
               className="w-full pl-9 pr-3 py-2 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           </div>
-          <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showFilters ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
-            <SlidersHorizontal size={16} /> Filtros
-          </button>
-          <button onClick={() => setShowMap(!showMap)}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showMap ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
-            Mapa
-          </button>
+          {activeNav === 'inicio' && (
+            <>
+              <button onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showFilters ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
+                <SlidersHorizontal size={16} /> Filtros
+              </button>
+              <button onClick={() => setShowMap(!showMap)}
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showMap ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
+                Mapa
+              </button>
+            </>
+          )}
         </div>
 
         {/* Filters panel */}
-        {showFilters && (
+        {showFilters && activeNav === 'inicio' && (
           <div className="bg-white border-b border-border px-4 py-3 shrink-0">
             <div className="flex flex-wrap gap-3 items-center">
               <div className="flex items-center gap-2">
@@ -192,7 +228,7 @@ export default function HomePage() {
                       <Search size={28} className="text-accent" />
                     </div>
                     <p className="text-tinta font-medium">No hay publicaciones con estos filtros</p>
-                    <p className="text-sm text-sec mt-1">Probá con otros filtros o limpiá la busqueda</p>
+                    <p className="text-sm text-sec mt-1">Proba con otros filtros o limpia la busqueda</p>
                     <button onClick={reset} className="mt-4 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">Limpiar filtros</button>
                   </div>
                 ) : (
@@ -209,6 +245,59 @@ export default function HomePage() {
                 )}
               </div>
             </div>
+          ) : activeNav === 'pendientes' ? (
+            <div className="overflow-y-auto h-full px-4 py-4 animate-fade-in">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-display font-bold text-tinta">Pendientes de revision</h2>
+                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{pending.length} pendientes</span>
+              </div>
+              {pendingLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[1,2].map((i) => <SkeletonCard key={i} />)}
+                </div>
+              ) : pending.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+                    <Check size={28} className="text-green-500" />
+                  </div>
+                  <p className="text-tinta font-medium">No hay nada pendiente</p>
+                  <p className="text-sm text-sec mt-1">Todos los lugares estan revisados</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pending.map((listing) => (
+                    <div key={listing.id} className="bg-surface rounded-xl border border-border overflow-hidden flex flex-col sm:flex-row">
+                      <div className="sm:w-40 h-32 sm:h-auto bg-bg shrink-0">
+                        {listing.images.length > 0 && (
+                          <img src={listing.images[0]} alt="" className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <div className="flex-1 p-4 flex flex-col justify-between">
+                        <div>
+                          <p className="font-medium text-tinta text-sm">{(listing as any).userName} <span className="text-xs text-sec font-normal">dice:</span></p>
+                          <p className="text-sm text-sec mt-1">{listing.title} - {listing.neighborhood}</p>
+                          <p className="text-xs text-sec mt-1">{new Date(listing.createdAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <button onClick={() => handleApprove(listing.id)}
+                            className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">
+                            <Check size={14} /> Aprobar
+                          </button>
+                          <button onClick={() => handleReject(listing.id)}
+                            className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-white text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                            <Trash2 size={14} /> Rechazar
+                          </button>
+                          <Link to={`/listings/${listing.id}`}
+                            className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-white text-sec border border-border rounded-lg hover:bg-bg transition-colors ml-auto">
+                            Ver detalle
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : activeNav === 'favoritos' ? (
             <div className="flex items-center justify-center h-full text-center px-4 animate-fade-in">
               <div>
@@ -216,7 +305,7 @@ export default function HomePage() {
                   <Star size={28} className="text-amber-400" />
                 </div>
                 <p className="text-tinta font-medium">Tus favoritos</p>
-                <p className="text-sm text-sec mt-1 max-w-xs mx-auto">Guarda publicaciones como favoritas para encontrarlas rapido. Tocá la estrella en cualquier tarjeta</p>
+                <p className="text-sm text-sec mt-1 max-w-xs mx-auto">Guarda publicaciones como favoritas para encontrarlas rapido. Toca la estrella en cualquier tarjeta</p>
               </div>
             </div>
           ) : activeNav === 'mis-lugares' ? (
@@ -265,10 +354,11 @@ export default function HomePage() {
       {/* ===== MOBILE BOTTOM NAV ===== */}
       <nav className="lg:hidden bg-white border-t border-border flex items-center justify-around py-1 shrink-0">
         {(() => {
-          const items = user?.role === 'ARRIENDADOR'
-            ? [...NAV_ITEMS, ...OWNER_ITEMS]
-            : [...NAV_ITEMS, ...STUDENT_ITEMS]
-          return items.map((item) => {
+          let extraItems: { key: NavItem; label: string; icon: typeof House }[]
+          if (isAdmin) extraItems = ADMIN_ITEMS
+          else if (user?.role === 'ARRIENDADOR') extraItems = OWNER_ITEMS
+          else extraItems = STUDENT_ITEMS
+          return [...NAV_ITEMS, ...extraItems].map((item) => {
             const Icon = item.icon
             return (
               <button key={item.key} onClick={() => { setActiveNav(item.key) }}

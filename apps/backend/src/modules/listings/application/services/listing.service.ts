@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../../../../shared/database/prisma.service'
 import type { ListingFilters } from '../../domain/repositories/listing-repository.interface'
 
@@ -18,7 +18,28 @@ export class ListingService {
     address: string
     neighborhood: string
     userId: string
+    role: string
   }) {
+    const user = await this.prisma.user.findUnique({ where: { id: data.userId } })
+    if (!user) throw new NotFoundException('User not found')
+
+    const isStudent = user.role === 'ESTUDIANTE'
+    const status = isStudent ? 'pending' : 'active'
+
+    // Proximity check for students
+    if (isStudent) {
+      const nearby = await this.prisma.listing.findFirst({
+        where: {
+          status: 'active',
+          lat: { gte: data.lat - 0.001, lte: data.lat + 0.001 },
+          lng: { gte: data.lng - 0.001, lte: data.lng + 0.001 },
+        },
+      })
+      if (nearby) {
+        return { duplicate: true, existingId: nearby.id }
+      }
+    }
+
     const listing = await this.prisma.listing.create({
       data: {
         title: data.title,
@@ -26,7 +47,7 @@ export class ListingService {
         price: data.price,
         type: data.type,
         bedrooms: data.bedrooms,
-        status: 'active',
+        status,
         userId: data.userId,
         lat: data.lat,
         lng: data.lng,
@@ -39,7 +60,7 @@ export class ListingService {
       include: { images: { orderBy: { order: 'asc' } } },
     })
 
-    return this.toDTO(listing)
+    return { duplicate: false, listing: this.toDTO(listing) }
   }
 
   async findAll(filters?: ListingFilters) {
@@ -64,6 +85,33 @@ export class ListingService {
     })
 
     return listings.map((l) => this.toDTO(l))
+  }
+
+  async findPending() {
+    const listings = await this.prisma.listing.findMany({
+      where: { status: 'pending' },
+      include: { images: { orderBy: { order: 'asc' } }, user: true },
+      orderBy: { createdAt: 'desc' },
+    })
+    return listings.map((l) => ({ ...this.toDTO(l), userName: l.user.name }))
+  }
+
+  async approve(id: string) {
+    const listing = await this.prisma.listing.findUnique({ where: { id } })
+    if (!listing) throw new NotFoundException('Listing not found')
+    if (listing.status !== 'pending') throw new BadRequestException('Only pending listings can be approved')
+    const updated = await this.prisma.listing.update({
+      where: { id },
+      data: { status: 'active' },
+      include: { images: { orderBy: { order: 'asc' } } },
+    })
+    return this.toDTO(updated)
+  }
+
+  async reject(id: string) {
+    const listing = await this.prisma.listing.findUnique({ where: { id } })
+    if (!listing) throw new NotFoundException('Listing not found')
+    await this.prisma.listing.delete({ where: { id } })
   }
 
   async findById(id: string) {

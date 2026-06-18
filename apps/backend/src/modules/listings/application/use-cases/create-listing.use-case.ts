@@ -17,6 +17,7 @@ export class CreateListingUseCase {
     address: string
     neighborhood: string
     userId: string
+    role: string
   }) {
     if (data.price <= 0) throw new Error('Price must be greater than zero')
     if (!data.images || data.images.length === 0) throw new Error('At least one image is required')

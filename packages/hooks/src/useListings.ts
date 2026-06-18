@@ -5,6 +5,7 @@ import {
   createListing,
   updateListing,
   deleteListing,
+  getPendingListings,
 } from '@proyecto/api-client'
 import type { ListingDTO, CreateListingInput, SearchFilters } from '@proyecto/api-client'
 
@@ -95,4 +96,23 @@ export function useDeleteListing() {
   }, [])
 
   return { remove, isLoading, error }
+}
+
+export function usePendingListings() {
+  const [listings, setListings] = useState<ListingDTO[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const data = await getPendingListings()
+      setListings(data)
+    } catch { /* ignore */ } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { listings, isLoading, refetch: fetch }
 }

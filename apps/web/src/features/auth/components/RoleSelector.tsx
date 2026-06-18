@@ -1,7 +1,7 @@
-import { Home, GraduationCap } from 'lucide-react'
+import { Home, GraduationCap, Shield } from 'lucide-react'
 
 interface Props {
-  onSelect: (role: 'ARRIENDADOR' | 'ESTUDIANTE') => void
+  onSelect: (role: 'ARRIENDADOR' | 'ESTUDIANTE' | 'SUPER_ADMIN') => void
 }
 
 export default function RoleSelector({ onSelect }: Props) {
@@ -31,6 +31,17 @@ export default function RoleSelector({ onSelect }: Props) {
             <div>
               <p className="font-medium text-tinta">Estudiante</p>
               <p className="text-xs text-sec">Busca y encuentra el lugar ideal para alquilar</p>
+            </div>
+          </button>
+
+          <button onClick={() => onSelect('SUPER_ADMIN')}
+            className="w-full flex items-center gap-4 p-4 rounded-xl border border-border hover:border-accent hover:bg-accent-light transition-all text-left group">
+            <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center shrink-0 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+              <Shield size={22} className="text-purple-500 group-hover:text-white transition-colors" />
+            </div>
+            <div>
+              <p className="font-medium text-tinta">Super Admin</p>
+              <p className="text-xs text-sec">Revisa y administra todos los lugares publicados</p>
             </div>
           </button>
         </div>

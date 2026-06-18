@@ -1,4 +1,4 @@
-export type Role = 'ARRIENDADOR' | 'ESTUDIANTE'
+export type Role = 'ARRIENDADOR' | 'ESTUDIANTE' | 'SUPER_ADMIN'
 
 export class UserEntity {
   constructor(
