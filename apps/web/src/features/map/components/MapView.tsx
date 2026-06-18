@@ -50,6 +50,7 @@ export default function MapView({ listings, onClick, selectedPosition, hoveredId
   const markerLayer = useRef<L.LayerGroup | null>(null)
   const markerMap = useRef<Map<string, L.Marker>>(new Map())
   const userMarkerRef = useRef<L.Marker | null>(null)
+  const selectedMarkerRef = useRef<L.Marker | null>(null)
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
@@ -140,15 +141,25 @@ export default function MapView({ listings, onClick, selectedPosition, hoveredId
 
   useEffect(() => {
     const layer = markerLayer.current
+    if (selectedMarkerRef.current) {
+      selectedMarkerRef.current.remove()
+      selectedMarkerRef.current = null
+    }
     if (!layer || !selectedPosition) return
-    L.marker(selectedPosition, {
+    selectedMarkerRef.current = L.marker(selectedPosition, {
       icon: L.divIcon({
         className: '',
-        html: '<div style="width:20px;height:20px;background:#E1483E;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+        html: '<div style="width:20px;height:20px;background:#0D9488;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
         iconSize: [20, 20],
         iconAnchor: [10, 10],
       }),
     }).addTo(layer)
+    return () => {
+      if (selectedMarkerRef.current) {
+        selectedMarkerRef.current.remove()
+        selectedMarkerRef.current = null
+      }
+    }
   }, [selectedPosition])
 
   return <div ref={mapRef} className="w-full h-full min-h-[400px]" />
