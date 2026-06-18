@@ -152,7 +152,6 @@ export default function HomePage() {
                   {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
-              <button onClick={reset} className="text-xs text-sec hover:text-tinta underline">Limpiar</button>
             </div>
           </div>
         )}
