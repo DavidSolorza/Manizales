@@ -10,31 +10,35 @@ export default function CreateListingPage() {
 
   if (!user) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Inicia sesión para publicar</h2>
-        <div className="flex justify-center">
-          <GoogleLoginButton onSuccess={login} />
+      <div className="min-h-screen bg-niebla flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-xl shadow-sm border border-piedra/50 max-w-sm mx-4">
+          <h2 className="text-xl font-display font-bold text-tinta mb-4">Inicia sesión para publicar</h2>
+          <div className="flex justify-center">
+            <GoogleLoginButton onSuccess={login} />
+          </div>
+          <Link to="/" className="text-musgo hover:text-musgo/80 mt-6 inline-block text-sm font-medium">
+            &larr; Volver
+          </Link>
         </div>
-        <Link to="/" className="text-blue-600 hover:text-blue-800 mt-6 inline-block text-sm">
-          &larr; Volver
-        </Link>
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 text-sm font-medium">
-        &larr; Volver
-      </Link>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Publicar arriendo</h1>
-      <ListingForm
-        onSubmit={async (data) => {
-          await submit(data)
-          navigate('/')
-        }}
-        isLoading={isLoading}
-      />
+    <div className="min-h-screen bg-niebla">
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        <Link to="/" className="inline-flex items-center text-musgo hover:text-musgo/80 mb-4 text-sm font-medium">
+          &larr; Volver
+        </Link>
+        <h1 className="text-2xl font-display font-bold text-tinta mb-6">Publicar arriendo</h1>
+        <ListingForm
+          onSubmit={async (data) => {
+            await submit(data)
+            navigate('/')
+          }}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   )
 }

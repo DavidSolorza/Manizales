@@ -16,8 +16,8 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
   const [bedrooms, setBedrooms] = useState('1')
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
-  const [lat, setLat] = useState(4.711)
-  const [lng, setLng] = useState(-74.072)
+  const [lat, setLat] = useState(5.07)
+  const [lng, setLng] = useState(-75.52)
   const [address, setAddress] = useState('')
   const [neighborhood, setNeighborhood] = useState('')
 
@@ -44,16 +44,9 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await onSubmit({
-      title,
-      description,
-      price: parseFloat(price),
-      type,
-      bedrooms: parseInt(bedrooms),
-      images: imageUrls,
-      lat,
-      lng,
-      address,
-      neighborhood,
+      title, description, price: parseFloat(price), type,
+      bedrooms: parseInt(bedrooms), images: imageUrls,
+      lat, lng, address, neighborhood,
     })
   }
 
@@ -63,102 +56,64 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-piedra/50 p-6 space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          placeholder="Ej: Habitación cerca a la universidad"
-        />
+        <label className="block text-sm font-medium text-tinta mb-1">Título</label>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} required
+          className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none"
+          placeholder="Ej: Habitación cerca a la universidad" />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-          placeholder="Describe el lugar, amenities, condiciones..."
-        />
+        <label className="block text-sm font-medium text-tinta mb-1">Descripción</label>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4}
+          className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none resize-none"
+          placeholder="Describe el lugar, amenities, condiciones..." />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Precio/mes</label>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-            min={1}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="$ 500,000"
-          />
+          <label className="block text-sm font-medium text-tinta mb-1">Precio/mes</label>
+          <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min={1}
+            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none font-mono"
+            placeholder="$ 500,000" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
-          >
+          <label className="block text-sm font-medium text-tinta mb-1">Tipo</label>
+          <select value={type} onChange={(e) => setType(e.target.value)} required
+            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none">
             <option value="">Seleccionar</option>
             <option value="apartamento">Apartamento</option>
             <option value="casa">Casa</option>
             <option value="habitacion">Habitación</option>
+            <option value="apartaestudio">Apartaestudio</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Habitaciones</label>
-          <input
-            type="number"
-            value={bedrooms}
-            onChange={(e) => setBedrooms(e.target.value)}
-            required
-            min={0}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
+          <label className="block text-sm font-medium text-tinta mb-1">Habitaciones</label>
+          <input type="number" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} required min={0}
+            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none" />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes</label>
-        <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-gray-50">
+        <label className="block text-sm font-medium text-tinta mb-1">Imágenes</label>
+        <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-piedra rounded-lg cursor-pointer hover:border-musgo transition-colors bg-niebla">
           <div className="text-center">
             <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16v-4m0 0V8m0 4h4m-4 0H8m12 0a8 8 0 11-16 0 8 8 0 0116 0z" />
             </svg>
-            <span className="text-xs text-gray-500 mt-1 block">
-              {uploading ? 'Subiendo...' : 'Click para subir fotos'}
-            </span>
+            <span className="text-xs text-gray-500 mt-1 block">{uploading ? 'Subiendo...' : 'Click para subir fotos'}</span>
           </div>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileUpload}
-            disabled={uploading}
-            className="hidden"
-          />
+          <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} className="hidden" />
         </label>
         {imageUrls.length > 0 && (
           <div className="flex gap-2 mt-3 flex-wrap">
             {imageUrls.map((url, i) => (
               <div key={i} className="relative group">
                 <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg" />
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  x
-                </button>
+                <button type="button" onClick={() => removeImage(i)}
+                  className="absolute -top-2 -right-2 bg-cereza text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">x</button>
               </div>
             ))}
           </div>
@@ -166,8 +121,8 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-        <div className="h-64 rounded-lg overflow-hidden border border-gray-200">
+        <label className="block text-sm font-medium text-tinta mb-1">Ubicación</label>
+        <div className="h-64 rounded-lg overflow-hidden border border-piedra">
           <MapView listings={[]} onClick={handleMapClick} selectedPosition={[lat, lng]} />
         </div>
         <p className="text-xs text-gray-400 mt-1">Haz clic en el mapa para marcar la ubicación</p>
@@ -175,32 +130,21 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-          <input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Calle 123 # 45-67"
-          />
+          <label className="block text-sm font-medium text-tinta mb-1">Dirección</label>
+          <input value={address} onChange={(e) => setAddress(e.target.value)} required
+            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none"
+            placeholder="Calle 123 # 45-67" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Barrio</label>
-          <input
-            value={neighborhood}
-            onChange={(e) => setNeighborhood(e.target.value)}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="Ej: La Castellana"
-          />
+          <label className="block text-sm font-medium text-tinta mb-1">Barrio</label>
+          <input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required
+            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none"
+            placeholder="Ej: La Castellana" />
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isLoading || uploading || imageUrls.length === 0}
-        className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-      >
+      <button type="submit" disabled={isLoading || uploading || imageUrls.length === 0}
+        className="w-full py-3 bg-musgo text-white font-medium rounded-lg hover:bg-musgo/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-body">
         {uploading ? 'Subiendo imágenes...' : isLoading ? 'Publicando...' : 'Publicar arriendo'}
       </button>
     </form>

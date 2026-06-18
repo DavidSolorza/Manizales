@@ -2,38 +2,54 @@ import { useEffect, useRef } from 'react'
 import * as L from 'leaflet'
 import type { ListingDTO } from '@proyecto/api-client'
 
+const MANIZALES: [number, number] = [5.07, -75.52]
+
 interface Props {
   listings: ListingDTO[]
   onClick?: (e: { latlng: { lat: number; lng: number } }) => void
   selectedPosition?: [number, number]
+  hoveredId?: string | null
+  onPinClick?: (id: string) => void
 }
 
-const defaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-})
+function priceToColor(price: number, minP: number, maxP: number): string {
+  if (maxP === minP) return '#2F5233'
+  const t = (price - minP) / (maxP - minP)
+  const r = Math.round(47 + (242 - 47) * t)
+  const g = Math.round(82 + (169 - 82) * t)
+  const b = Math.round(51 + (59 - 51) * t)
+  return `rgb(${r},${g},${b})`
+}
 
-export default function MapView({ listings, onClick, selectedPosition }: Props) {
+function houseIcon(color: string, highlighted = false) {
+  const size = highlighted ? 36 : 28
+  return L.divIcon({
+    className: '',
+    html: `<svg viewBox="0 0 24 28" width="${size}" height="${size * 28 / 24}" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L2 10v16h8v-8h4v8h8V10L12 2z" fill="${color}" stroke="${highlighted ? '#fff' : 'rgba(0,0,0,0.2)'}" stroke-width="${highlighted ? 2 : 1}"/>
+    </svg>`,
+    iconSize: [size, size * 28 / 24],
+    iconAnchor: [size / 2, size * 28 / 24],
+  })
+}
+
+export default function MapView({ listings, onClick, selectedPosition, hoveredId, onPinClick }: Props) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L.Map | null>(null)
   const markerLayer = useRef<L.LayerGroup | null>(null)
+  const markerMap = useRef<Map<string, L.Marker>>(new Map())
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
 
     const map = L.map(mapRef.current, {
-      center: [4.711, -74.072],
+      center: MANIZALES,
       zoom: 13,
       zoomControl: true,
     })
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
       maxZoom: 19,
     }).addTo(map)
 
@@ -51,35 +67,66 @@ export default function MapView({ listings, onClick, selectedPosition }: Props) 
       map.remove()
       mapInstance.current = null
       markerLayer.current = null
+      markerMap.current.clear()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const layer = markerLayer.current
-    if (!layer) return
+    const map = mapInstance.current
+    if (!layer || !map) return
+
     layer.clearLayers()
+    markerMap.current.clear()
+
+    const prices = listings.map((l) => l.price)
+    const minP = Math.min(...prices)
+    const maxP = Math.max(...prices)
 
     listings.forEach((listing) => {
-      const marker = L.marker([listing.lat, listing.lng], { icon: defaultIcon })
+      const color = priceToColor(listing.price, minP, maxP)
+      const marker = L.marker([listing.lat, listing.lng], {
+        icon: houseIcon(color),
+      })
         .bindPopup(`
           <b>${listing.title}</b><br/>
-          $${listing.price.toLocaleString('es-CO')}/mes
+          <span style="font-family:'IBM Plex Mono',monospace;color:#E1483E;font-weight:600;">
+            $${listing.price.toLocaleString('es-CO')}/mes
+          </span>
         `)
-      layer.addLayer(marker)
+
+      if (onPinClick) {
+        marker.on('click', () => onPinClick(listing.id))
+      }
+
+      marker.addTo(layer)
+      markerMap.current.set(listing.id, marker)
     })
-  }, [listings])
+
+    if (listings.length > 0) {
+      const bounds = L.latLngBounds(listings.map((l) => [l.lat, l.lng] as [number, number]))
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 })
+    }
+  }, [listings]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const map = mapInstance.current
-    const layer = markerLayer.current
-    if (!map || !layer) return
+    if (!hoveredId) return
+    const marker = markerMap.current.get(hoveredId)
+    if (marker) marker.setZIndexOffset(1000)
+  }, [hoveredId])
 
-    if (selectedPosition) {
-      layer.clearLayers()
-      L.marker(selectedPosition, { icon: defaultIcon }).addTo(layer)
-      map.setView(selectedPosition, 15)
-    }
+  useEffect(() => {
+    const layer = markerLayer.current
+    if (!layer || !selectedPosition) return
+    L.marker(selectedPosition, {
+      icon: L.divIcon({
+        className: '',
+        html: '<div style="width:20px;height:20px;background:#E1483E;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      }),
+    }).addTo(layer)
   }, [selectedPosition])
 
-  return <div ref={mapRef} className="w-full h-full min-h-[300px] rounded-lg" />
+  return <div ref={mapRef} className="w-full h-full min-h-[400px]" />
 }
