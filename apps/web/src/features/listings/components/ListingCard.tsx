@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Home, BedDouble } from 'lucide-react'
+import { MapPin, Home, BedDouble, Navigation } from 'lucide-react'
 import type { ListingDTO } from '@proyecto/api-client'
 
 interface Props {
   listing: ListingDTO
+  distanceKm?: number
 }
 
 const typeIcon: Record<string, typeof Home> = {
@@ -12,7 +13,7 @@ const typeIcon: Record<string, typeof Home> = {
   habitacion: Home,
 }
 
-export default function ListingCard({ listing }: Props) {
+export default function ListingCard({ listing, distanceKm }: Props) {
   const TypeIcon = typeIcon[listing.type] || Home
   const isAvailable = listing.status === 'active'
 
@@ -39,7 +40,13 @@ export default function ListingCard({ listing }: Props) {
             ${listing.price.toLocaleString('es-CO')}/mes
           </p>
           <div className="flex items-center gap-1 mt-1.5 text-xs text-sec">
-            <MapPin size={12} className="shrink-0" />
+            {distanceKm !== undefined ? (
+              <span className="font-medium text-accent flex items-center gap-0.5">
+                <Navigation size={10} /> {distanceKm < 1 ? `${Math.round(distanceKm * 1000)}m` : `${distanceKm.toFixed(1)}km`}
+              </span>
+            ) : (
+              <MapPin size={12} className="shrink-0" />
+            )}
             <span className="truncate">{listing.neighborhood}</span>
             <span className="text-border mx-0.5">·</span>
             <TypeIcon size={12} className="shrink-0" />

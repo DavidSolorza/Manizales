@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useListings, useAuth, useSearchFilters, usePendingListings } from '@proyecto/hooks'
+import { useListings, useAuth, useSearchFilters, usePendingListings, useNearbyListings } from '@proyecto/hooks'
 import { Link } from 'react-router-dom'
-import { House, Search, Star, ClipboardList, DollarSign, X, Menu, SlidersHorizontal, Eye, Check, Trash2 } from 'lucide-react'
+import { House, Search, Star, ClipboardList, DollarSign, X, Menu, SlidersHorizontal, Eye, Check, Trash2, Navigation, Crosshair } from 'lucide-react'
 import { approveListing, rejectListing } from '@proyecto/api-client'
 import ListingCard from '../features/listings/components/ListingCard'
 import SkeletonCard from '../features/listings/components/SkeletonCard'
@@ -36,12 +36,15 @@ export default function HomePage() {
   const { filters, setQuery, setPriceRange, setType, reset } = useSearchFilters()
   const { listings, isLoading } = useListings(filters)
   const { listings: pending, isLoading: pendingLoading, refetch: refetchPending } = usePendingListings()
+  const { listings: nearbyListings, isLoading: nearbyLoading, position: nearbyPos, search: searchNearby, searchMyLocation, clear: clearNearby } = useNearbyListings()
   const [activeNav, setActiveNav] = useState<NavItem>('inicio')
   const [showFilters, setShowFilters] = useState(false)
   const [showMobileNav, setShowMobileNav] = useState(false)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [showMap, setShowMap] = useState(true)
 
+  const displayListings = nearbyListings.length > 0 ? nearbyListings : listings
+  const displayLoading = nearbyLoading || isLoading
   const activeListings = listings.filter((l) => l.status === 'active').length
 
   const handlePinClick = (id: string) => {
@@ -57,6 +60,10 @@ export default function HomePage() {
   const handleReject = async (id: string) => {
     await rejectListing(id)
     refetchPending()
+  }
+
+  const handleMapClick = (e: { latlng: { lat: number; lng: number } }) => {
+    searchNearby(e.latlng.lat, e.latlng.lng)
   }
 
   const isStudent = user?.role === 'ESTUDIANTE'
@@ -178,10 +185,21 @@ export default function HomePage() {
                 className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showFilters ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
                 <SlidersHorizontal size={16} /> Filtros
               </button>
-              <button onClick={() => setShowMap(!showMap)}
-                className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showMap ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
-                Mapa
-              </button>
+          <button onClick={() => { searchMyLocation(); setShowMap(true) }}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${nearbyPos ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}
+            title="Buscar cerca de mi ubicacion">
+            <Navigation size={16} /> Cerca de mi
+          </button>
+          {nearbyPos && (
+            <button onClick={clearNearby}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-border text-sec hover:bg-bg transition-colors">
+              <X size={16} /> Limpiar
+            </button>
+          )}
+          <button onClick={() => setShowMap(!showMap)}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border transition-colors ${showMap ? 'bg-accent text-white border-accent' : 'bg-white text-sec border-border hover:border-accent'}`}>
+            Mapa
+          </button>
             </>
           )}
         </div>
@@ -215,32 +233,44 @@ export default function HomePage() {
           {activeNav === 'inicio' ? (
             <div className="h-full flex flex-col lg:flex-row">
               <div className={`${showMap ? 'h-64 lg:h-auto lg:w-1/2' : 'hidden'} shrink-0 border-b lg:border-b-0 lg:border-r border-border`}>
-                <MapView listings={listings} hoveredId={hoveredId} onPinClick={handlePinClick} />
+                <MapView listings={displayListings} hoveredId={hoveredId} onPinClick={handlePinClick}
+                  onClick={handleMapClick} selectedPosition={nearbyPos ? [nearbyPos.lat, nearbyPos.lng] : undefined} />
               </div>
               <div className="flex-1 overflow-y-auto px-4 py-4">
                 {isLoading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[1,2,3,4].map((i) => <SkeletonCard key={i} />)}
                   </div>
-                ) : listings.length === 0 ? (
+                ) : displayListings.length === 0 ? (
                   <div className="text-center py-20 animate-fade-in">
                     <div className="w-16 h-16 rounded-full bg-accent-light flex items-center justify-center mx-auto mb-4">
                       <Search size={28} className="text-accent" />
                     </div>
-                    <p className="text-tinta font-medium">No hay publicaciones con estos filtros</p>
-                    <p className="text-sm text-sec mt-1">Prueba con otros filtros o limpia la busqueda</p>
-                    <button onClick={reset} className="mt-4 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">Limpiar filtros</button>
+                    <p className="text-tinta font-medium">{nearbyPos ? 'No hay lugares cerca' : 'No hay publicaciones con estos filtros'}</p>
+                    <p className="text-sm text-sec mt-1">{nearbyPos ? 'Prueba en otra ubicacion del mapa' : 'Prueba con otros filtros'}</p>
+                    {nearbyPos ? (
+                      <button onClick={clearNearby} className="mt-4 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">Ver todas</button>
+                    ) : (
+                      <button onClick={reset} className="mt-4 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">Limpiar filtros</button>
+                    )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {listings.map((listing) => (
-                      <div key={listing.id} id={`listing-${listing.id}`}
-                        onMouseEnter={() => setHoveredId(listing.id)}
-                        onMouseLeave={() => setHoveredId(null)}
-                      >
-                        <ListingCard listing={listing} />
-                      </div>
-                    ))}
+                  <div>
+                    {nearbyPos && (
+                      <p className="text-xs text-sec mb-3 flex items-center gap-1">
+                        <Crosshair size={12} /> Mostrando lugares cerca del punto seleccionado
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {displayListings.map((listing: any) => (
+                        <div key={listing.id} id={`listing-${listing.id}`}
+                          onMouseEnter={() => setHoveredId(listing.id)}
+                          onMouseLeave={() => setHoveredId(null)}
+                        >
+                          <ListingCard listing={listing} distanceKm={listing.distanceKm} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

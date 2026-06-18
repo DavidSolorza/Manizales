@@ -6,8 +6,9 @@ import {
   updateListing,
   deleteListing,
   getPendingListings,
+  searchNearby,
 } from '@proyecto/api-client'
-import type { ListingDTO, CreateListingInput, SearchFilters } from '@proyecto/api-client'
+import type { ListingDTO, CreateListingInput, SearchFilters, NearbyResult } from '@proyecto/api-client'
 
 export function useListings(initialFilters?: SearchFilters) {
   const [listings, setListings] = useState<ListingDTO[]>([])
@@ -115,4 +116,37 @@ export function usePendingListings() {
   useEffect(() => { fetch() }, [fetch])
 
   return { listings, isLoading, refetch: fetch }
+}
+
+export function useNearbyListings() {
+  const [listings, setListings] = useState<NearbyResult[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
+
+  const search = useCallback(async (lat: number, lng: number, radiusKm?: number) => {
+    setIsLoading(true)
+    setPosition({ lat, lng })
+    try {
+      const data = await searchNearby(lat, lng, radiusKm)
+      setListings(data)
+    } catch { /* ignore */ } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const searchMyLocation = useCallback(async (radiusKm?: number) => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => search(pos.coords.latitude, pos.coords.longitude, radiusKm),
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
+  }, [search])
+
+  const clear = useCallback(() => {
+    setListings([])
+    setPosition(null)
+  }, [])
+
+  return { listings, isLoading, position, search, searchMyLocation, clear }
 }

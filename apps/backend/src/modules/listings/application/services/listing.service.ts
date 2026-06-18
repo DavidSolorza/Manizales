@@ -87,6 +87,31 @@ export class ListingService {
     return listings.map((l) => this.toDTO(l))
   }
 
+  async findNearby(lat: number, lng: number, radiusKm = 2) {
+    const degrees = radiusKm / 111
+    const listings = await this.prisma.listing.findMany({
+      where: {
+        status: 'active',
+        lat: { gte: lat - degrees, lte: lat + degrees },
+        lng: { gte: lng - degrees, lte: lng + degrees },
+      },
+      include: { images: { orderBy: { order: 'asc' } } },
+      orderBy: { createdAt: 'desc' },
+    })
+    return listings.map((l) => {
+      const dist = this.haversine(lat, lng, l.lat, l.lng)
+      return { ...this.toDTO(l), distanceKm: Math.round(dist * 100) / 100 }
+    }).sort((a, b) => a.distanceKm - b.distanceKm)
+  }
+
+  private haversine(lat1: number, lng1: number, lat2: number, lng2: number) {
+    const R = 6371
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLng = (lng2 - lng1) * Math.PI / 180
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  }
+
   async findPending() {
     const listings = await this.prisma.listing.findMany({
       where: { status: 'pending' },

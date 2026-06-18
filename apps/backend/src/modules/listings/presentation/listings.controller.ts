@@ -22,6 +22,12 @@ export class ListingsController {
     return this.listingService.findById(id)
   }
 
+  @Public()
+  @Get('nearby')
+  async findNearby(@Query('lat') lat: string, @Query('lng') lng: string, @Query('radius') radius?: string) {
+    return this.listingService.findNearby(parseFloat(lat), parseFloat(lng), radius ? parseFloat(radius) : 2)
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('admin/pending')
   async findPending() {

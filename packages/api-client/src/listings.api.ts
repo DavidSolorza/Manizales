@@ -75,7 +75,7 @@ export async function deleteListing(id: string): Promise<void> {
 }
 
 export async function getPendingListings(): Promise<ListingDTO[]> {
-  return apiRequest<ListingDTO[]>('/listings/pending')
+  return apiRequest<ListingDTO[]>('/listings/admin/pending')
 }
 
 export async function approveListing(id: string): Promise<ListingDTO> {
@@ -84,4 +84,14 @@ export async function approveListing(id: string): Promise<ListingDTO> {
 
 export async function rejectListing(id: string): Promise<void> {
   return apiRequest<void>(`/listings/${id}/reject`, { method: 'PATCH' })
+}
+
+export interface NearbyResult extends ListingDTO {
+  distanceKm: number
+}
+
+export async function searchNearby(lat: number, lng: number, radiusKm?: number): Promise<NearbyResult[]> {
+  const params = new URLSearchParams({ lat: String(lat), lng: String(lng) })
+  if (radiusKm) params.set('radius', String(radiusKm))
+  return apiRequest<NearbyResult[]>(`/listings/nearby?${params}`)
 }
