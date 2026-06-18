@@ -3,6 +3,7 @@ import { useAuth, useCreateListing } from '@proyecto/hooks'
 import ListingForm from '../features/listings/components/ListingForm'
 import QuickListingForm from '../features/listings/components/QuickListingForm'
 import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
+import { useToast } from '../features/ui/components/Toast'
 import { Link, useNavigate } from 'react-router-dom'
 
 type Mode = 'rapido' | 'completo'
@@ -10,11 +11,13 @@ type Mode = 'rapido' | 'completo'
 export default function CreateListingPage() {
   const { user, login } = useAuth()
   const { submit, isLoading } = useCreateListing()
+  const { toast } = useToast()
   const navigate = useNavigate()
   const [mode, setMode] = useState<Mode>('rapido')
 
   const doSubmit = async (data: Parameters<typeof submit>[0]) => {
     await submit(data)
+    toast('Publicado con exito!', 'success')
     navigate('/')
   }
 

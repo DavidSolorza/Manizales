@@ -3,8 +3,10 @@ import { useListings, useAuth, useSearchFilters } from '@proyecto/hooks'
 import { Link } from 'react-router-dom'
 import { House, Search, Star, ClipboardList, DollarSign, X, Menu, SlidersHorizontal } from 'lucide-react'
 import ListingCard from '../features/listings/components/ListingCard'
+import SkeletonCard from '../features/listings/components/SkeletonCard'
 import MapView from '../features/map/components/MapView'
 import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
+import NavItem from '../features/ui/components/NavItem'
 
 type NavItem = 'inicio' | 'buscar' | 'favoritos' | 'mis-lugares' | 'precios'
 
@@ -61,38 +63,19 @@ export default function HomePage() {
         </div>
         <div className="px-3 pt-3 pb-1">
           <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Explorar</p>
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon
-            return (
-              <button key={item.key} onClick={() => { setActiveNav(item.key); if (item.key === 'buscar') setShowFilters(!showFilters); setShowMobileNav(false) }}
-                className={`w-full flex items-center gap-3 px-2 py-2 text-sm rounded-lg mt-0.5 transition-colors ${
-                  activeNav === item.key ? 'bg-accent-light text-accent font-medium' : 'text-sec hover:text-tinta hover:bg-gray-100'
-                }`}
-              >
-                <Icon size={18} /> {item.label}
-              </button>
-            )
-          })}
+          {NAV_ITEMS.map((item) => (
+            <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
+              onClick={() => { setActiveNav(item.key); if (item.key === 'buscar') setShowFilters(!showFilters); setShowMobileNav(false) }} />
+          ))}
         </div>
         <div className="mx-3 my-2 border-t border-border" />
         <div className="px-3 pb-1">
           <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Tus publicaciones</p>
-          {OWNER_ITEMS.map((item) => {
-            const Icon = item.icon
-            return (
-              <button key={item.key} onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }}
-                className={`w-full flex items-center gap-3 px-2 py-2 text-sm rounded-lg mt-0.5 transition-colors ${
-                  activeNav === item.key ? 'bg-accent-light text-accent font-medium' : 'text-sec hover:text-tinta hover:bg-gray-100'
-                }`}
-              >
-                <Icon size={18} />
-                <span className="flex-1 text-left">{item.label}</span>
-                {item.key === 'mis-lugares' && activeListings > 0 && (
-                  <span className="text-xs bg-accent text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{activeListings}</span>
-                )}
-              </button>
-            )
-          })}
+          {OWNER_ITEMS.map((item) => (
+            <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
+              badge={item.key === 'mis-lugares' ? activeListings : undefined}
+              onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }} />
+          ))}
         </div>
         <div className="flex-1" />
         <div className="border-t border-border px-3 py-3">
@@ -165,13 +148,17 @@ export default function HomePage() {
               </div>
               <div className="flex-1 overflow-y-auto px-4 py-4">
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[1,2,3,4].map((i) => <SkeletonCard key={i} />)}
                   </div>
                 ) : listings.length === 0 ? (
-                  <div className="text-center py-20">
+                  <div className="text-center py-20 animate-fade-in">
+                    <div className="w-16 h-16 rounded-full bg-accent-light flex items-center justify-center mx-auto mb-4">
+                      <Search size={28} className="text-accent" />
+                    </div>
                     <p className="text-tinta font-medium">No hay publicaciones con estos filtros</p>
-                    <button onClick={reset} className="mt-3 text-sm text-accent hover:underline">Limpiar filtros</button>
+                    <p className="text-sm text-sec mt-1">Probá con otros filtros o limpiá la busqueda</p>
+                    <button onClick={reset} className="mt-4 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">Limpiar filtros</button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -188,35 +175,52 @@ export default function HomePage() {
               </div>
             </div>
           ) : activeNav === 'favoritos' ? (
-            <div className="flex items-center justify-center h-full text-center px-4">
+            <div className="flex items-center justify-center h-full text-center px-4 animate-fade-in">
               <div>
-                <Star size={40} className="mx-auto text-muted mb-3" />
+                <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+                  <Star size={28} className="text-amber-400" />
+                </div>
                 <p className="text-tinta font-medium">Tus favoritos</p>
-                <p className="text-sm text-sec mt-1">Guardá publicaciones como favoritas para encontrarlas rapido</p>
+                <p className="text-sm text-sec mt-1 max-w-xs mx-auto">Guarda publicaciones como favoritas para encontrarlas rapido. Tocá la estrella en cualquier tarjeta</p>
               </div>
             </div>
           ) : activeNav === 'mis-lugares' ? (
-            <div className="overflow-y-auto h-full px-4 py-4">
+            <div className="overflow-y-auto h-full px-4 py-4 animate-fade-in">
               <h2 className="text-lg font-display font-bold text-tinta mb-4">Mis lugares</h2>
               {!user ? (
-                <p className="text-sm text-sec">Inicia sesion para ver tus publicaciones</p>
+                <div className="text-center py-16">
+                  <p className="text-sm text-sec">Inicia sesion para ver tus publicaciones</p>
+                </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {listings.filter((l) => l.userId === user.id).map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
-                  ))}
-                  {listings.filter((l) => l.userId === user.id).length === 0 && (
-                    <p className="text-sm text-sec col-span-full">No has publicado nada aun</p>
+                <div>
+                  {listings.filter((l) => l.userId === user.id).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {listings.filter((l) => l.userId === user.id).map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16">
+                      <div className="w-16 h-16 rounded-full bg-accent-light flex items-center justify-center mx-auto mb-4">
+                        <ClipboardList size={28} className="text-accent" />
+                      </div>
+                      <p className="text-tinta font-medium">No has publicado nada aun</p>
+                      <Link to="/create" className="mt-4 inline-flex items-center gap-2 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">
+                        <House size={16} /> Publica tu primer lugar
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
             </div>
           ) : activeNav === 'precios' ? (
-            <div className="flex items-center justify-center h-full text-center px-4">
+            <div className="flex items-center justify-center h-full text-center px-4 animate-fade-in">
               <div>
-                <DollarSign size={40} className="mx-auto text-muted mb-3" />
+                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+                  <DollarSign size={28} className="text-green-500" />
+                </div>
                 <p className="text-tinta font-medium">Precios y disponibilidad</p>
-                <p className="text-sm text-sec mt-1">Administra los precios de tus publicaciones</p>
+                <p className="text-sm text-sec mt-1 max-w-xs mx-auto">Administra los precios de tus publicaciones y marca lugares como arrendados</p>
               </div>
             </div>
           ) : null}
