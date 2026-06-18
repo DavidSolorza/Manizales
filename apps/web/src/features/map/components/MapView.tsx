@@ -33,11 +33,23 @@ function houseIcon(color: string, highlighted = false) {
   })
 }
 
+const userLocationIcon = L.divIcon({
+  className: '',
+  html: `<div style="position:relative">
+    <div style="width:18px;height:18px;background:#2F5233;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>
+    <div style="position:absolute;top:-6px;left:-6px;width:30px;height:30px;background:rgba(47,82,51,0.2);border-radius:50%;animation:pulse 2s infinite"></div>
+    <style>@keyframes pulse{0%{transform:scale(0.8);opacity:1}to{transform:scale(2);opacity:0}}</style>
+  </div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+})
+
 export default function MapView({ listings, onClick, selectedPosition, hoveredId, onPinClick }: Props) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L.Map | null>(null)
   const markerLayer = useRef<L.LayerGroup | null>(null)
   const markerMap = useRef<Map<string, L.Marker>>(new Map())
+  const userMarkerRef = useRef<L.Marker | null>(null)
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
@@ -53,13 +65,27 @@ export default function MapView({ listings, onClick, selectedPosition, hoveredId
       maxZoom: 19,
     }).addTo(map)
 
-    if (onClick) {
-      map.on('click', onClick)
-    }
+    if (onClick) map.on('click', onClick)
 
     const layer = L.layerGroup().addTo(map)
     markerLayer.current = layer
     mapInstance.current = map
+
+    // Get user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords
+          map.setView([latitude, longitude], 14)
+          const marker = L.marker([latitude, longitude], { icon: userLocationIcon })
+            .bindPopup('Tu ubicación')
+            .addTo(map)
+          userMarkerRef.current = marker
+        },
+        () => { /* fallback to Manizales default */ },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+      )
+    }
 
     setTimeout(() => map.invalidateSize(), 200)
 
@@ -68,6 +94,7 @@ export default function MapView({ listings, onClick, selectedPosition, hoveredId
       mapInstance.current = null
       markerLayer.current = null
       markerMap.current.clear()
+      userMarkerRef.current = null
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -85,9 +112,7 @@ export default function MapView({ listings, onClick, selectedPosition, hoveredId
 
     listings.forEach((listing) => {
       const color = priceToColor(listing.price, minP, maxP)
-      const marker = L.marker([listing.lat, listing.lng], {
-        icon: houseIcon(color),
-      })
+      const marker = L.marker([listing.lat, listing.lng], { icon: houseIcon(color) })
         .bindPopup(`
           <b>${listing.title}</b><br/>
           <span style="font-family:'IBM Plex Mono',monospace;color:#E1483E;font-weight:600;">
@@ -95,9 +120,7 @@ export default function MapView({ listings, onClick, selectedPosition, hoveredId
           </span>
         `)
 
-      if (onPinClick) {
-        marker.on('click', () => onPinClick(listing.id))
-      }
+      if (onPinClick) marker.on('click', () => onPinClick(listing.id))
 
       marker.addTo(layer)
       markerMap.current.set(listing.id, marker)
