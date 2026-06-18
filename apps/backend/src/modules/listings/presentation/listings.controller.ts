@@ -1,0 +1,43 @@
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common'
+import { ListingService } from '../application/services/listing.service'
+import { CreateListingDto } from './dtos/create-listing.dto'
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard'
+import { CurrentUser } from '../../../shared/decorators/current-user.decorator'
+import { Public } from '../../../shared/decorators/public.decorator'
+import type { ListingFilters } from '../domain/repositories/listing-repository.interface'
+
+@Controller('listings')
+export class ListingsController {
+  constructor(private listingService: ListingService) {}
+
+  @Public()
+  @Get()
+  async findAll(@Query() filters: ListingFilters) {
+    return this.listingService.findAll(filters)
+  }
+
+  @Public()
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    return this.listingService.findById(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async create(@Body() dto: CreateListingDto, @CurrentUser('id') userId: string) {
+    return this.listingService.create({ ...dto, userId })
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: Partial<CreateListingDto>, @CurrentUser('id') userId: string) {
+    return this.listingService.update(id, dto, userId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async delete(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    await this.listingService.delete(id, userId)
+    return { message: 'Deleted' }
+  }
+}
