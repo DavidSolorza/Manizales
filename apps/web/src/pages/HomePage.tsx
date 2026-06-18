@@ -6,14 +6,13 @@ import ListingCard from '../features/listings/components/ListingCard'
 import SkeletonCard from '../features/listings/components/SkeletonCard'
 import MapView from '../features/map/components/MapView'
 import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
+import RoleSelector from '../features/auth/components/RoleSelector'
 import NavItem from '../features/ui/components/NavItem'
 
-type NavItem = 'inicio' | 'buscar' | 'favoritos' | 'mis-lugares' | 'precios'
+type NavItem = 'inicio' | 'favoritos' | 'mis-lugares' | 'precios'
 
 const NAV_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
   { key: 'inicio', label: 'Inicio', icon: House },
-  { key: 'buscar', label: 'Buscar y filtrar', icon: Search },
-  { key: 'favoritos', label: 'Favoritos', icon: Star },
 ]
 
 const OWNER_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
@@ -21,10 +20,14 @@ const OWNER_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
   { key: 'precios', label: 'Precios y disponibilidad', icon: DollarSign },
 ]
 
+const STUDENT_ITEMS: { key: NavItem; label: string; icon: typeof House }[] = [
+  { key: 'favoritos', label: 'Favoritos', icon: Star },
+]
+
 const TYPE_OPTIONS = ['habitacion', 'apartamento', 'casa']
 
 export default function HomePage() {
-  const { user, login, logout } = useAuth()
+  const { user, login, logout, needsRole, setRole } = useAuth()
   const { filters, setQuery, setPriceRange, setType, reset } = useSearchFilters()
   const { listings, isLoading } = useListings(filters)
   const [activeNav, setActiveNav] = useState<NavItem>('inicio')
@@ -46,6 +49,8 @@ export default function HomePage() {
         <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setShowMobileNav(false)} />
       )}
 
+      {needsRole && <RoleSelector onSelect={setRole} />}
+
       {/* ===== SIDEBAR ===== */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-30 w-[240px] bg-sidebar border-r border-border flex flex-col
@@ -54,29 +59,41 @@ export default function HomePage() {
         <div className="px-4 py-5 border-b border-border">
           <h1 className="font-display font-bold text-base text-tinta">Arriendos U</h1>
         </div>
-        <div className="px-3 pt-4 pb-2">
-          <Link to="/create"
-            className="flex items-center justify-center gap-2 w-full py-2.5 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors"
-          >
-            <House size={16} /> Publicar un lugar
-          </Link>
-        </div>
+        {user?.role === 'ARRIENDADOR' && (
+          <div className="px-3 pt-4 pb-2">
+            <Link to="/create"
+              className="flex items-center justify-center gap-2 w-full py-2.5 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors"
+            >
+              <House size={16} /> Publicar un lugar
+            </Link>
+          </div>
+        )}
         <div className="px-3 pt-3 pb-1">
           <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Explorar</p>
           {NAV_ITEMS.map((item) => (
             <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
-              onClick={() => { setActiveNav(item.key); if (item.key === 'buscar') setShowFilters(!showFilters); setShowMobileNav(false) }} />
-          ))}
-        </div>
-        <div className="mx-3 my-2 border-t border-border" />
-        <div className="px-3 pb-1">
-          <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Tus publicaciones</p>
-          {OWNER_ITEMS.map((item) => (
-            <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
-              badge={item.key === 'mis-lugares' ? activeListings : undefined}
               onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }} />
           ))}
         </div>
+        <div className="mx-3 my-2 border-t border-border" />
+        {user?.role === 'ARRIENDADOR' ? (
+          <div className="px-3 pb-1">
+            <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Tus publicaciones</p>
+            {OWNER_ITEMS.map((item) => (
+              <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
+                badge={item.key === 'mis-lugares' ? activeListings : undefined}
+                onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }} />
+            ))}
+          </div>
+        ) : (
+          <div className="px-3 pb-1">
+            <p className="text-[11px] font-medium text-muted uppercase tracking-wider px-2">Guardados</p>
+            {STUDENT_ITEMS.map((item) => (
+              <NavItem key={item.key} icon={item.icon} label={item.label} active={activeNav === item.key}
+                onClick={() => { setActiveNav(item.key); setShowMobileNav(false) }} />
+            ))}
+          </div>
+        )}
         <div className="flex-1" />
         <div className="border-t border-border px-3 py-3">
           {user ? (
@@ -141,7 +158,7 @@ export default function HomePage() {
 
         {/* Content based on active nav */}
         <div className="flex-1 min-h-0">
-          {activeNav === 'inicio' || activeNav === 'buscar' ? (
+          {activeNav === 'inicio' ? (
             <div className="h-full flex flex-col lg:flex-row">
               <div className={`${showMap ? 'h-64 lg:h-auto lg:w-1/2' : 'hidden'} shrink-0 border-b lg:border-b-0 lg:border-r border-border`}>
                 <MapView listings={listings} hoveredId={hoveredId} onPinClick={handlePinClick} />
@@ -229,16 +246,21 @@ export default function HomePage() {
 
       {/* ===== MOBILE BOTTOM NAV ===== */}
       <nav className="lg:hidden bg-white border-t border-border flex items-center justify-around py-1 shrink-0">
-        {[...NAV_ITEMS, ...OWNER_ITEMS].map((item) => {
-          const Icon = item.icon
-          return (
-            <button key={item.key} onClick={() => { setActiveNav(item.key); if (item.key === 'buscar') setShowFilters(!showFilters) }}
-              className={`flex flex-col items-center py-1 px-2 rounded-lg transition-colors ${activeNav === item.key ? 'text-accent' : 'text-muted'}`}>
-              <Icon size={18} />
-              <span className="text-[10px] leading-tight mt-0.5">{item.label.split(' ')[0]}</span>
-            </button>
-          )
-        })}
+        {(() => {
+          const items = user?.role === 'ARRIENDADOR'
+            ? [...NAV_ITEMS, ...OWNER_ITEMS]
+            : [...NAV_ITEMS, ...STUDENT_ITEMS]
+          return items.map((item) => {
+            const Icon = item.icon
+            return (
+              <button key={item.key} onClick={() => { setActiveNav(item.key) }}
+                className={`flex flex-col items-center py-1 px-2 rounded-lg transition-colors ${activeNav === item.key ? 'text-accent' : 'text-muted'}`}>
+                <Icon size={18} />
+                <span className="text-[10px] leading-tight mt-0.5">{item.label.split(' ')[0]}</span>
+              </button>
+            )
+          })
+        })()}
       </nav>
     </div>
   )

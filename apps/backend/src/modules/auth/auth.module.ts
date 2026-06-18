@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { AuthController } from './presentation/auth.controller'
 import { LoginWithGoogleUseCase } from './application/use-cases/login-with-google.use-case'
+import { SetRoleUseCase } from './application/use-cases/set-role.use-case'
 import { GoogleAuthService } from './application/services/google-auth.service'
 import { JwtStrategy } from './infrastructure/jwt-strategy'
 import { PrismaService } from '../../shared/database/prisma.service'
@@ -16,7 +17,7 @@ import { PrismaService } from '../../shared/database/prisma.service'
     }),
   ],
   controllers: [AuthController],
-  providers: [LoginWithGoogleUseCase, GoogleAuthService, JwtStrategy, PrismaService],
+  providers: [LoginWithGoogleUseCase, SetRoleUseCase, GoogleAuthService, JwtStrategy, PrismaService],
   exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}

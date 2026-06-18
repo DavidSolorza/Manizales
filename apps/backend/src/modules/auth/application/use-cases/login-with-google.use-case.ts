@@ -21,6 +21,7 @@ export class LoginWithGoogleUseCase {
           name: googleUser.name,
           email: googleUser.email,
           picture: googleUser.picture,
+          role: 'ESTUDIANTE',
         },
       })
     }
@@ -37,6 +38,7 @@ export class LoginWithGoogleUseCase {
         name: user.name,
         email: user.email,
         picture: user.picture,
+        role: user.role,
       },
     }
   }

@@ -7,11 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ARRIENDADOR
+  ESTUDIANTE
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
   picture   String?
+  role      Role     @default(ESTUDIANTE)
   createdAt DateTime @default(now())
   listings  Listing[]
 }
