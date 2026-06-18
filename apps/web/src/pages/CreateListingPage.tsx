@@ -5,16 +5,13 @@ import QuickListingForm from '../features/listings/components/QuickListingForm'
 import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
 import { useToast } from '../features/ui/components/Toast'
 import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, CheckCircle, MapPin } from 'lucide-react'
-
-type Mode = 'rapido' | 'completo'
+import { CheckCircle, MapPin } from 'lucide-react'
 
 export default function CreateListingPage() {
   const { user, login } = useAuth()
   const { submit, isLoading } = useCreateListing()
   const { toast } = useToast()
   const navigate = useNavigate()
-  const [mode, setMode] = useState<Mode>('rapido')
   const [submitted, setSubmitted] = useState<{ status: string; id?: string } | null>(null)
 
   const doSubmit = async (data: Parameters<typeof submit>[0]) => {
@@ -80,23 +77,7 @@ export default function CreateListingPage() {
             {user.role === 'ESTUDIANTE' ? (
               <QuickListingForm onSubmit={doSubmit} isLoading={isLoading} disabled={false} studentMode />
             ) : (
-              <>
-                <div className="flex gap-2 mb-6 bg-bg rounded-xl p-1 border border-border w-fit">
-                  <button onClick={() => setMode('rapido')}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${mode === 'rapido' ? 'bg-surface text-tinta shadow-sm' : 'text-sec hover:text-tinta'}`}>
-                    Rapido (solo foto)
-                  </button>
-                  <button onClick={() => setMode('completo')}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${mode === 'completo' ? 'bg-surface text-tinta shadow-sm' : 'text-sec hover:text-tinta'}`}>
-                    Completo
-                  </button>
-                </div>
-                {mode === 'rapido' ? (
-                  <QuickListingForm onSubmit={doSubmit} isLoading={isLoading} disabled={false} />
-                ) : (
-                  <ListingForm onSubmit={doSubmit} isLoading={isLoading} disabled={false} />
-                )}
-              </>
+              <ListingForm onSubmit={doSubmit} isLoading={isLoading} disabled={false} />
             )}
           </>
         )}
