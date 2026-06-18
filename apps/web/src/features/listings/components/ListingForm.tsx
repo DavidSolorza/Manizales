@@ -8,7 +8,10 @@ interface Props {
   isLoading: boolean
 }
 
+type Step = 'basicos' | 'fotos' | 'ubicacion'
+
 export default function ListingForm({ onSubmit, isLoading }: Props) {
+  const [step, setStep] = useState<Step>('basicos')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
@@ -37,116 +40,152 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
     }
   }
 
-  const removeImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index))
-  }
+  const removeImage = (i: number) => setImageUrls((prev) => prev.filter((_, k) => k !== i))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onSubmit({
-      title, description, price: parseFloat(price), type,
-      bedrooms: parseInt(bedrooms), images: imageUrls,
-      lat, lng, address, neighborhood,
-    })
+    await onSubmit({ title, description, price: parseFloat(price), type, bedrooms: parseInt(bedrooms), images: imageUrls, lat, lng, address, neighborhood })
   }
 
-  const handleMapClick = (e: { latlng: { lat: number; lng: number } }) => {
-    setLat(e.latlng.lat)
-    setLng(e.latlng.lng)
+  const canGoNext = () => {
+    if (step === 'basicos') return title && description && price && type
+    if (step === 'fotos') return imageUrls.length > 0
+    return true
   }
+
+  const steps = [
+    { key: 'basicos' as Step, label: 'Datos básicos', num: 1 },
+    { key: 'fotos' as Step, label: 'Fotos', num: 2 },
+    { key: 'ubicacion' as Step, label: 'Ubicación', num: 3 },
+  ]
+  const currentStepIndex = steps.findIndex((s) => s.key === step)
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-piedra/50 p-6 space-y-5">
-      <div>
-        <label className="block text-sm font-medium text-tinta mb-1">Título</label>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} required
-          className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none"
-          placeholder="Ej: Habitación cerca a la universidad" />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-tinta mb-1">Descripción</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4}
-          className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none resize-none"
-          placeholder="Describe el lugar, amenities, condiciones..." />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-tinta mb-1">Precio/mes</label>
-          <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min={1}
-            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none font-mono"
-            placeholder="$ 500,000" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-tinta mb-1">Tipo</label>
-          <select value={type} onChange={(e) => setType(e.target.value)} required
-            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none">
-            <option value="">Seleccionar</option>
-            <option value="apartamento">Apartamento</option>
-            <option value="casa">Casa</option>
-            <option value="habitacion">Habitación</option>
-            <option value="apartaestudio">Apartaestudio</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-tinta mb-1">Habitaciones</label>
-          <input type="number" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} required min={0}
-            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none" />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-tinta mb-1">Imágenes</label>
-        <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-piedra rounded-lg cursor-pointer hover:border-musgo transition-colors bg-niebla">
-          <div className="text-center">
-            <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16v-4m0 0V8m0 4h4m-4 0H8m12 0a8 8 0 11-16 0 8 8 0 0116 0z" />
-            </svg>
-            <span className="text-xs text-gray-500 mt-1 block">{uploading ? 'Subiendo...' : 'Click para subir fotos'}</span>
+    <form onSubmit={handleSubmit} className="bg-surface rounded-xl border border-border p-6">
+      {/* Steps indicator */}
+      <div className="flex items-center gap-2 mb-6">
+        {steps.map((s, i) => (
+          <div key={s.key} className="flex items-center gap-2">
+            <button type="button" onClick={() => setStep(s.key)}
+              className={`w-7 h-7 rounded-full text-xs font-medium flex items-center justify-center transition-colors ${
+                s.key === step ? 'bg-accent text-white' : i < currentStepIndex ? 'bg-accent/20 text-accent' : 'bg-bg text-sec'
+              }`}>
+              {s.num}
+            </button>
+            <span className={`text-xs ${s.key === step ? 'text-tinta font-medium' : 'text-sec'}`}>{s.label}</span>
+            {i < steps.length - 1 && <div className="w-6 h-px bg-border" />}
           </div>
-          <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} className="hidden" />
-        </label>
-        {imageUrls.length > 0 && (
-          <div className="flex gap-2 mt-3 flex-wrap">
-            {imageUrls.map((url, i) => (
-              <div key={i} className="relative group">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg" />
-                <button type="button" onClick={() => removeImage(i)}
-                  className="absolute -top-2 -right-2 bg-cereza text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">x</button>
-              </div>
-            ))}
+        ))}
+      </div>
+
+      {/* Step 1: Basic data */}
+      {step === 'basicos' && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-tinta mb-1">Título</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} required
+              className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none"
+              placeholder="Ej: Habitación cerca a la universidad" />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-tinta mb-1">Descripción</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={3}
+              className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none resize-none"
+              placeholder="Describe el lugar..." />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-tinta mb-1">Precio/mes</label>
+              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min={1}
+                className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-tinta mb-1">Tipo</label>
+              <select value={type} onChange={(e) => setType(e.target.value)} required
+                className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none">
+                <option value="">Seleccionar</option>
+                <option value="apartamento">Apartamento</option>
+                <option value="casa">Casa</option>
+                <option value="habitacion">Habitación</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-tinta mb-1">Habitaciones</label>
+              <input type="number" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} required min={0}
+                className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: Photos */}
+      {step === 'fotos' && (
+        <div>
+          <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-accent transition-colors bg-bg">
+            <div className="text-center">
+              <p className="text-2xl text-muted mb-1">📷</p>
+              <span className="text-sm text-sec">{uploading ? 'Subiendo...' : 'Click para subir fotos'}</span>
+            </div>
+            <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} className="hidden" />
+          </label>
+          {imageUrls.length > 0 && (
+            <div className="flex gap-2 mt-3 flex-wrap">
+              {imageUrls.map((url, i) => (
+                <div key={i} className="relative group">
+                  <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                  <button type="button" onClick={() => removeImage(i)}
+                    className="absolute -top-2 -right-2 bg-red-400 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+          {imageUrls.length === 0 && <p className="text-xs text-sec mt-2">Necesitás al menos una foto para publicar</p>}
+        </div>
+      )}
+
+      {/* Step 3: Location */}
+      {step === 'ubicacion' && (
+        <div className="space-y-4">
+          <div className="h-64 rounded-lg overflow-hidden border border-border">
+            <MapView listings={[]} onClick={(e) => { setLat(e.latlng.lat); setLng(e.latlng.lng) }} selectedPosition={[lat, lng]} />
+          </div>
+          <p className="text-xs text-sec -mt-3">Haz clic en el mapa para marcar la ubicación</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-tinta mb-1">Dirección</label>
+              <input value={address} onChange={(e) => setAddress(e.target.value)} required
+                className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-tinta mb-1">Barrio</label>
+              <input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required
+                className="w-full px-3 py-2.5 text-sm bg-bg border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation buttons */}
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+        {currentStepIndex > 0 ? (
+          <button type="button" onClick={() => setStep(steps[currentStepIndex - 1].key)}
+            className="px-4 py-2 text-sm text-sec border border-border rounded-lg hover:bg-bg transition-colors">
+            Anterior
+          </button>
+        ) : <div />}
+        {currentStepIndex < steps.length - 1 ? (
+          <button type="button" onClick={() => canGoNext() && setStep(steps[currentStepIndex + 1].key)}
+            disabled={!canGoNext()}
+            className="px-6 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors">
+            Siguiente
+          </button>
+        ) : (
+          <button type="submit" disabled={isLoading || uploading}
+            className="px-6 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors">
+            {isLoading ? 'Publicando...' : 'Publicar'}
+          </button>
         )}
       </div>
-
-      <div>
-        <label className="block text-sm font-medium text-tinta mb-1">Ubicación</label>
-        <div className="h-64 rounded-lg overflow-hidden border border-piedra">
-          <MapView listings={[]} onClick={handleMapClick} selectedPosition={[lat, lng]} />
-        </div>
-        <p className="text-xs text-gray-400 mt-1">Haz clic en el mapa para marcar la ubicación</p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-tinta mb-1">Dirección</label>
-          <input value={address} onChange={(e) => setAddress(e.target.value)} required
-            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none"
-            placeholder="Calle 123 # 45-67" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-tinta mb-1">Barrio</label>
-          <input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required
-            className="w-full px-3 py-2.5 text-sm bg-niebla border border-piedra rounded-lg focus:ring-2 focus:ring-musgo focus:border-musgo outline-none"
-            placeholder="Ej: La Castellana" />
-        </div>
-      </div>
-
-      <button type="submit" disabled={isLoading || uploading || imageUrls.length === 0}
-        className="w-full py-3 bg-musgo text-white font-medium rounded-lg hover:bg-musgo/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-body">
-        {uploading ? 'Subiendo imágenes...' : isLoading ? 'Publicando...' : 'Publicar arriendo'}
-      </button>
     </form>
   )
 }
