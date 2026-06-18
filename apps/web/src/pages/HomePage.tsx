@@ -78,12 +78,12 @@ export default function HomePage() {
         <div className="px-4 py-5 border-b border-border">
           <h1 className="font-display font-bold text-base text-tinta">Arriendos U</h1>
         </div>
-        {(user?.role === 'ARRIENDADOR' || isAdmin) && (
+        {user && (
           <div className="px-3 pt-4 pb-2">
             <Link to="/create"
               className="flex items-center justify-center gap-2 w-full py-2.5 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors"
             >
-              <House size={16} /> Publicar un lugar
+              <House size={16} /> {isStudent ? 'Reportar lugar' : 'Publicar un lugar'}
             </Link>
           </div>
         )}
