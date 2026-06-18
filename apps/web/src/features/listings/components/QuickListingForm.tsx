@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Camera, Loader2 } from 'lucide-react'
 import type { CreateListingInput } from '@proyecto/api-client'
 import { apiUpload } from '@proyecto/api-client'
@@ -16,6 +16,8 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled, studen
   const [uploading, setUploading] = useState(false)
   const [lat, setLat] = useState(5.07)
   const [lng, setLng] = useState(-75.52)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -54,17 +56,33 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled, studen
     <div className="bg-surface rounded-xl border border-border p-6 space-y-5">
       <p className="text-sm text-sec">{studentMode ? 'Subi la foto del lugar que viste y marcala en el mapa' : 'Subi una foto del lugar, marca la ubicacion en el mapa y publicamos al instante'}</p>
 
-      <label className={`flex items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${imageUrl ? 'border-accent bg-accent/5' : 'border-border bg-bg hover:border-accent'}`}>
-        {imageUrl ? (
-          <img src={imageUrl} alt="" className="h-full object-contain" />
-        ) : (
-          <div className="text-center">
-            <Camera size={32} className="mx-auto text-muted mb-2" />
-            <span className="text-sm text-sec">{uploading ? 'Subiendo...' : 'Tocar para subir foto'}</span>
-          </div>
-        )}
-        <input type="file" accept="image/*" onChange={handleFile} disabled={uploading || disabled} className="hidden" />
-      </label>
+      {imageUrl ? (
+        <div className="relative h-40 rounded-lg overflow-hidden border border-border">
+          <img src={imageUrl} alt="" className="w-full h-full object-contain" />
+          <button onClick={() => setImageUrl('')} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 text-xs">X</button>
+        </div>
+      ) : (
+        <div className="flex gap-3">
+          <button onClick={() => cameraRef.current?.click()}
+            className="flex-1 flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg border-border bg-bg hover:border-accent hover:bg-accent/5 transition-colors cursor-pointer">
+            <Camera size={28} className="text-muted mb-1" />
+            <span className="text-xs text-sec">Tomar foto</span>
+          </button>
+          <button onClick={() => galleryRef.current?.click()}
+            className="flex-1 flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg border-border bg-bg hover:border-accent hover:bg-accent/5 transition-colors cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" className="text-muted mb-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span className="text-xs text-sec">Subir de galeria</span>
+          </button>
+          <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handleFile} disabled={uploading || disabled} className="hidden" />
+          <input ref={galleryRef} type="file" accept="image/*" onChange={handleFile} disabled={uploading || disabled} className="hidden" />
+        </div>
+      )}
+
+      {uploading && (
+        <div className="flex items-center justify-center gap-2 text-sm text-sec">
+          <Loader2 size={16} className="animate-spin" /> Subiendo foto...
+        </div>
+      )}
 
       <div>
         <label className="block text-xs text-sec mb-1">Ubicacion (opcional)</label>
