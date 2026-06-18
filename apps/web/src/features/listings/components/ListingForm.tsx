@@ -141,7 +141,7 @@ export default function ListingForm({ onSubmit, isLoading, disabled }: Props) {
               ))}
             </div>
           )}
-          {imageUrls.length === 0 && <p className="text-xs text-sec mt-2">Necesitás al menos una foto para publicar</p>}
+          {imageUrls.length === 0 && <p className="text-xs text-sec mt-2">Necesitas al menos una foto para publicar</p>}
         </div>
       )}
 
@@ -151,7 +151,7 @@ export default function ListingForm({ onSubmit, isLoading, disabled }: Props) {
           <div className="h-64 rounded-lg overflow-hidden border border-border">
             <MapView listings={[]} onClick={(e) => { setLat(e.latlng.lat); setLng(e.latlng.lng) }} selectedPosition={[lat, lng]} />
           </div>
-          <p className="text-xs text-sec -mt-3">Haz clic en el mapa para marcar la ubicación</p>
+          <p className="text-xs text-sec -mt-3">Haz click en el mapa para marcar la ubicacion</p>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-tinta mb-1">Dirección</label>

@@ -50,11 +50,11 @@ export default function QuickListingForm({ onSubmit, isLoading, disabled, studen
   }
 
   const btnLabel = studentMode ? 'Enviar para revision' : 'Publicar rapido'
-  const disabledLabel = studentMode ? 'Subi una foto primero' : 'Inicia sesion primero'
+  const disabledLabel = studentMode ? 'Toma una foto primero' : 'Inicia sesion primero'
 
   return (
     <div className="bg-surface rounded-xl border border-border p-6 space-y-5">
-      <p className="text-sm text-sec">{studentMode ? 'Subi la foto del lugar que viste y marcala en el mapa' : 'Subi una foto del lugar, marca la ubicacion en el mapa y publicamos al instante'}</p>
+      <p className="text-sm text-sec">{studentMode ? 'Toma una foto del lugar y marca la ubicacion en el mapa' : 'Sube una foto del lugar, marca la ubicacion en el mapa y publicamos al instante'}</p>
 
       {imageUrl ? (
         <div className="relative h-40 rounded-lg overflow-hidden border border-border">

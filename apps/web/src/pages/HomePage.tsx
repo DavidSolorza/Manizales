@@ -228,7 +228,7 @@ export default function HomePage() {
                       <Search size={28} className="text-accent" />
                     </div>
                     <p className="text-tinta font-medium">No hay publicaciones con estos filtros</p>
-                    <p className="text-sm text-sec mt-1">Proba con otros filtros o limpia la busqueda</p>
+                    <p className="text-sm text-sec mt-1">Prueba con otros filtros o limpia la busqueda</p>
                     <button onClick={reset} className="mt-4 text-sm px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors">Limpiar filtros</button>
                   </div>
                 ) : (
@@ -306,6 +306,7 @@ export default function HomePage() {
                 </div>
                 <p className="text-tinta font-medium">Tus favoritos</p>
                 <p className="text-sm text-sec mt-1 max-w-xs mx-auto">Guarda publicaciones como favoritas para encontrarlas rapido. Toca la estrella en cualquier tarjeta</p>
+
               </div>
             </div>
           ) : activeNav === 'mis-lugares' ? (
@@ -345,6 +346,7 @@ export default function HomePage() {
                 </div>
                 <p className="text-tinta font-medium">Precios y disponibilidad</p>
                 <p className="text-sm text-sec mt-1 max-w-xs mx-auto">Administra los precios de tus publicaciones y marca lugares como arrendados</p>
+
               </div>
             </div>
           ) : null}

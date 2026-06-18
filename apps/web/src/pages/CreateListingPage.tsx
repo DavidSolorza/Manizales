@@ -70,7 +70,7 @@ export default function CreateListingPage() {
             </h1>
             {user.role === 'ESTUDIANTE' && (
               <p className="text-sm text-sec mb-4 flex items-center gap-1.5">
-                <MapPin size={14} /> Subi una foto de un lugar que viste y nosotros lo publicamos
+                <MapPin size={14} /> ¿Viste un lugar libre? Sube la foto y nosotros lo publicamos por ti
               </p>
             )}
 
