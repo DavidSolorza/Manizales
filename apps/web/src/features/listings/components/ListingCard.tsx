@@ -7,41 +7,35 @@ interface Props {
 
 export default function ListingCard({ listing }: Props) {
   return (
-    <Link
-      to={`/listings/${listing.id}`}
-      style={{ textDecoration: 'none', color: 'inherit' }}
-    >
-      <div style={{
-        background: 'white',
-        borderRadius: 8,
-        overflow: 'hidden',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        display: 'flex',
-        height: 180,
-      }}>
+    <Link to={`/listings/${listing.id}`} className="block group">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col sm:flex-row">
         {listing.images.length > 0 && (
-          <img
-            src={listing.images[0]}
-            alt={listing.title}
-            style={{ width: 240, height: '100%', objectFit: 'cover' }}
-          />
+          <div className="sm:w-60 h-48 sm:h-44 shrink-0 overflow-hidden">
+            <img
+              src={listing.images[0]}
+              alt={listing.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
         )}
-        <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="flex-1 p-4 flex flex-col justify-between">
           <div>
-            <h3 style={{ margin: '0 0 4px', fontSize: '1.1rem' }}>{listing.title}</h3>
-            <p style={{ color: '#666', margin: '0 0 8px', fontSize: '0.9rem' }}>
-              {listing.neighborhood} - {listing.type}
+            <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors line-clamp-1">
+              {listing.title}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {listing.neighborhood} &middot; {listing.type}
             </p>
-            <p style={{ margin: 0, color: '#444', fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <p className="text-sm text-gray-600 mt-2 line-clamp-2">
               {listing.description}
             </p>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#1976d2' }}>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+            <span className="text-lg font-bold text-blue-600">
               ${listing.price.toLocaleString('es-CO')}/mes
             </span>
-            <span style={{ color: '#666', fontSize: '0.85rem' }}>
-              {listing.bedrooms} hab.
+            <span className="text-sm text-gray-500">
+              {listing.bedrooms} {listing.bedrooms === 1 ? 'hab' : 'hab'}
             </span>
           </div>
         </div>

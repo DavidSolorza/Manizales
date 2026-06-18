@@ -10,19 +10,24 @@ export default function CreateListingPage() {
 
   if (!user) {
     return (
-      <div style={{ maxWidth: 600, margin: '100px auto', textAlign: 'center' }}>
-        <h2>Inicia sesión para publicar</h2>
-        <GoogleLoginButton onSuccess={login} />
-        <br />
-        <Link to="/">Volver</Link>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Inicia sesión para publicar</h2>
+        <div className="flex justify-center">
+          <GoogleLoginButton onSuccess={login} />
+        </div>
+        <Link to="/" className="text-blue-600 hover:text-blue-800 mt-6 inline-block text-sm">
+          &larr; Volver
+        </Link>
       </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px' }}>
-      <Link to="/" style={{ color: '#1976d2', marginBottom: 16, display: 'block' }}>&larr; Volver</Link>
-      <h1>Publicar arriendo</h1>
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 text-sm font-medium">
+        &larr; Volver
+      </Link>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Publicar arriendo</h1>
       <ListingForm
         onSubmit={async (data) => {
           await submit(data)

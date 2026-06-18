@@ -30,8 +30,8 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
         const { url } = await apiUpload('/images/upload', file)
         setImageUrls((prev) => [...prev, url])
       }
-    } catch (err) {
-      alert('Error al subir imagen: ' + (err as Error).message)
+    } catch {
+      alert('Error al subir imagen')
     } finally {
       setUploading(false)
     }
@@ -63,25 +63,51 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ background: 'white', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Título</label>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} required style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          placeholder="Ej: Habitación cerca a la universidad"
+        />
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Descripción</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+          placeholder="Describe el lugar, amenities, condiciones..."
+        />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Precio/mes</label>
-          <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required min={1} style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Precio/mes</label>
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+            min={1}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="$ 500,000"
+          />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Tipo</label>
-          <select value={type} onChange={(e) => setType(e.target.value)} required style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+          >
             <option value="">Seleccionar</option>
             <option value="apartamento">Apartamento</option>
             <option value="casa">Casa</option>
@@ -89,31 +115,47 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Habitaciones</label>
-          <input type="number" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} required min={0} style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Habitaciones</label>
+          <input
+            type="number"
+            value={bedrooms}
+            onChange={(e) => setBedrooms(e.target.value)}
+            required
+            min={0}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
         </div>
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Imágenes</label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileUpload}
-          disabled={uploading}
-          style={{ marginBottom: 8 }}
-        />
-        {uploading && <p style={{ color: '#666' }}>Subiendo imagen...</p>}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes</label>
+        <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-gray-50">
+          <div className="text-center">
+            <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16v-4m0 0V8m0 4h4m-4 0H8m12 0a8 8 0 11-16 0 8 8 0 0116 0z" />
+            </svg>
+            <span className="text-xs text-gray-500 mt-1 block">
+              {uploading ? 'Subiendo...' : 'Click para subir fotos'}
+            </span>
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileUpload}
+            disabled={uploading}
+            className="hidden"
+          />
+        </label>
         {imageUrls.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex gap-2 mt-3 flex-wrap">
             {imageUrls.map((url, i) => (
-              <div key={i} style={{ position: 'relative' }}>
-                <img src={url} alt="" style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 4 }} />
+              <div key={i} className="relative group">
+                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  style={{ position: 'absolute', top: -8, right: -8, background: '#d32f2f', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: 14 }}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   x
                 </button>
@@ -123,43 +165,43 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
         )}
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Ubicación (haz clic en el mapa)</label>
-        <div style={{ height: 300 }}>
-          <MapView
-            listings={[]}
-            onClick={handleMapClick}
-            selectedPosition={[lat, lng]}
-          />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+        <div className="h-64 rounded-lg overflow-hidden border border-gray-200">
+          <MapView listings={[]} onClick={handleMapClick} selectedPosition={[lat, lng]} />
         </div>
+        <p className="text-xs text-gray-400 mt-1">Haz clic en el mapa para marcar la ubicación</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Dirección</label>
-          <input value={address} onChange={(e) => setAddress(e.target.value)} required style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="Calle 123 # 45-67"
+          />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Barrio</label>
-          <input value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} required style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4 }} />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Barrio</label>
+          <input
+            value={neighborhood}
+            onChange={(e) => setNeighborhood(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="Ej: La Castellana"
+          />
         </div>
       </div>
 
       <button
         type="submit"
         disabled={isLoading || uploading || imageUrls.length === 0}
-        style={{
-          width: '100%',
-          padding: '12px',
-          background: isLoading || uploading || imageUrls.length === 0 ? '#ccc' : '#1976d2',
-          color: 'white',
-          border: 'none',
-          borderRadius: 4,
-          cursor: isLoading || uploading || imageUrls.length === 0 ? 'not-allowed' : 'pointer',
-          fontSize: '1rem',
-        }}
+        className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
-        {uploading ? 'Subiendo imágenes...' : isLoading ? 'Publicando...' : 'Publicar'}
+        {uploading ? 'Subiendo imágenes...' : isLoading ? 'Publicando...' : 'Publicar arriendo'}
       </button>
     </form>
   )

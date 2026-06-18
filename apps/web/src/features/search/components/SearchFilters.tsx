@@ -10,42 +10,49 @@ interface Props {
   onReset: () => void
 }
 
-export default function SearchFilters({ filters, onQueryChange, onPriceChange, onTypeChange, onBedroomsChange, onNeighborhoodChange, onReset }: Props) {
+export default function SearchFilters({
+  filters, onQueryChange, onPriceChange, onTypeChange,
+  onBedroomsChange, onNeighborhoodChange, onReset,
+}: Props) {
   return (
-    <div style={{ background: 'white', padding: 16, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr auto', gap: 12, alignItems: 'end' }}>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem', fontWeight: 500 }}>Buscar</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
           <input
             placeholder="Título o descripción..."
             value={filters.query || ''}
             onChange={(e) => onQueryChange(e.target.value)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: 4 }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem', fontWeight: 500 }}>Precio mín</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Precio mín</label>
           <input
             type="number"
-            placeholder="0"
+            placeholder="$0"
             value={filters.minPrice ?? ''}
             onChange={(e) => onPriceChange(e.target.value ? Number(e.target.value) : undefined, filters.maxPrice)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: 4 }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem', fontWeight: 500 }}>Precio máx</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Precio máx</label>
           <input
             type="number"
-            placeholder="999999"
+            placeholder="$999,999"
             value={filters.maxPrice ?? ''}
             onChange={(e) => onPriceChange(filters.minPrice, e.target.value ? Number(e.target.value) : undefined)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: 4 }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem', fontWeight: 500 }}>Tipo</label>
-          <select value={filters.type || ''} onChange={(e) => onTypeChange(e.target.value || undefined)} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: 4 }}>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+          <select
+            value={filters.type || ''}
+            onChange={(e) => onTypeChange(e.target.value || undefined)}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+          >
             <option value="">Todos</option>
             <option value="apartamento">Apartamento</option>
             <option value="casa">Casa</option>
@@ -53,17 +60,22 @@ export default function SearchFilters({ filters, onQueryChange, onPriceChange, o
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem', fontWeight: 500 }}>Barrio</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Barrio</label>
           <input
             placeholder="Barrio..."
             value={filters.neighborhood || ''}
             onChange={(e) => onNeighborhoodChange(e.target.value || undefined)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: 4 }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
-        <button onClick={onReset} style={{ padding: '8px 16px', background: '#f0f0f0', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>
-          Limpiar
-        </button>
+        <div className="flex items-end">
+          <button
+            onClick={onReset}
+            className="w-full px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            Limpiar
+          </button>
+        </div>
       </div>
     </div>
   )

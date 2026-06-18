@@ -1,11 +1,9 @@
-import { useListings, useAuth } from '@proyecto/hooks'
-import { useSearchFilters } from '@proyecto/hooks'
-import type { ListingDTO } from '@proyecto/api-client'
+import { useListings, useAuth, useSearchFilters } from '@proyecto/hooks'
+import { Link } from 'react-router-dom'
 import ListingCard from '../features/listings/components/ListingCard'
 import SearchFilters from '../features/search/components/SearchFilters'
 import MapView from '../features/map/components/MapView'
 import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
-import { Link } from 'react-router-dom'
 
 export default function HomePage() {
   const { user, login } = useAuth()
@@ -14,23 +12,33 @@ export default function HomePage() {
 
   return (
     <div>
-      <header style={{ background: 'white', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Arriendos Universitarios</h1>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {user ? (
-            <>
-              <Link to="/create" style={{ padding: '8px 16px', background: '#1976d2', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
-                Publicar
-              </Link>
-              <span>{user.name}</span>
-            </>
-          ) : (
-            <GoogleLoginButton onSuccess={login} />
-          )}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900">Arriendos Universitarios</h1>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <Link
+                  to="/create"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  + Publicar
+                </Link>
+                <div className="flex items-center gap-2">
+                  {user.picture && (
+                    <img src={user.picture} alt="" className="w-8 h-8 rounded-full" />
+                  )}
+                  <span className="text-sm text-gray-700 font-medium">{user.name}</span>
+                </div>
+              </>
+            ) : (
+              <GoogleLoginButton onSuccess={login} />
+            )}
+          </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px' }}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <SearchFilters
           filters={filters}
           onQueryChange={setQuery}
@@ -41,22 +49,27 @@ export default function HomePage() {
           onReset={reset}
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '24px' }}>
-          <div>
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
             {isLoading ? (
-              <p>Cargando...</p>
-            ) : listings.length === 0 ? (
-              <p>No se encontraron publicaciones</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {listings.map((listing: ListingDTO) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </div>
+            ) : listings.length === 0 ? (
+              <div className="text-center py-20 text-gray-500">
+                <p className="text-lg">No se encontraron publicaciones</p>
+                <p className="text-sm mt-1">Intenta con otros filtros</p>
+              </div>
+            ) : (
+              listings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))
             )}
           </div>
-          <div style={{ position: 'sticky', top: 24 }}>
-            <MapView listings={listings} />
+          <div className="lg:sticky lg:top-6 h-[calc(100vh-8rem)]">
+            <div className="w-full h-full rounded-xl overflow-hidden shadow-md border border-gray-200">
+              <MapView listings={listings} />
+            </div>
           </div>
         </div>
       </main>

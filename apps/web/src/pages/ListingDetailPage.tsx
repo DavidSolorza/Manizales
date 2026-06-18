@@ -8,8 +8,24 @@ export default function ListingDetailPage() {
   const { user } = useAuth()
   const { remove } = useDeleteListing()
 
-  if (isLoading) return <div style={{ padding: 24 }}>Cargando...</div>
-  if (error || !listing) return <div style={{ padding: 24 }}>Publicación no encontrada</div>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold text-gray-900">Publicación no encontrada</h2>
+        <Link to="/" className="text-blue-600 hover:text-blue-800 mt-4 inline-block">
+          &larr; Volver al inicio
+        </Link>
+      </div>
+    )
+  }
 
   const isOwner = user?.id === listing.userId
 
@@ -21,39 +37,59 @@ export default function ListingDetailPage() {
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px' }}>
-      <Link to="/" style={{ color: '#1976d2', marginBottom: 16, display: 'block' }}>&larr; Volver</Link>
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 text-sm font-medium">
+        &larr; Volver
+      </Link>
 
-      <div style={{ background: 'white', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
         {listing.images.length > 0 && (
-          <img src={listing.images[0]} alt={listing.title} style={{ width: '100%', height: 400, objectFit: 'cover' }} />
+          <div className="h-72 sm:h-96 overflow-hidden">
+            <img
+              src={listing.images[0]}
+              alt={listing.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
 
-        <div style={{ padding: 24 }}>
-          <h1 style={{ margin: '0 0 8px' }}>{listing.title}</h1>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1976d2', margin: '0 0 16px' }}>
-            ${listing.price.toLocaleString('es-CO')}/mes
-          </p>
-
-          <div style={{ display: 'flex', gap: 16, marginBottom: 16, color: '#666' }}>
-            <span>{listing.type}</span>
-            <span>{listing.bedrooms} habitación(es)</span>
-            <span>{listing.neighborhood}</span>
-          </div>
-
-          <p style={{ lineHeight: 1.6, marginBottom: 24 }}>{listing.description}</p>
-
-          <div style={{ height: 300, marginBottom: 24 }}>
-            <MapView listings={[listing]} />
-          </div>
-
-          {isOwner && (
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={handleDelete} style={{ padding: '8px 16px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{listing.title}</h1>
+              <p className="text-2xl font-bold text-blue-600 mt-2">
+                ${listing.price.toLocaleString('es-CO')}/mes
+              </p>
+            </div>
+            {isOwner && (
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors self-start"
+              >
                 Eliminar
               </button>
-            </div>
-          )}
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
+            <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+              {listing.type}
+            </span>
+            <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+              {listing.bedrooms} habitación(es)
+            </span>
+            <span className="inline-flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+              {listing.neighborhood}
+            </span>
+          </div>
+
+          <p className="mt-6 text-gray-700 leading-relaxed whitespace-pre-line">
+            {listing.description}
+          </p>
+
+          <div className="mt-6 h-72 rounded-lg overflow-hidden border border-gray-200">
+            <MapView listings={[listing]} />
+          </div>
         </div>
       </div>
     </div>
