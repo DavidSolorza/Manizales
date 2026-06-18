@@ -156,41 +156,70 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Map + Listings split */}
-        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-          {/* Map */}
-          <div className={`${showMap ? 'h-64 lg:h-auto lg:w-1/2' : 'hidden'} shrink-0 border-b lg:border-b-0 lg:border-r border-border`}>
-            <MapView
-              listings={listings}
-              hoveredId={hoveredId}
-              onPinClick={handlePinClick}
-            />
-          </div>
-
-          {/* Listings */}
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
+        {/* Content based on active nav */}
+        <div className="flex-1 min-h-0">
+          {activeNav === 'inicio' || activeNav === 'buscar' ? (
+            <div className="h-full flex flex-col lg:flex-row">
+              <div className={`${showMap ? 'h-64 lg:h-auto lg:w-1/2' : 'hidden'} shrink-0 border-b lg:border-b-0 lg:border-r border-border`}>
+                <MapView listings={listings} hoveredId={hoveredId} onPinClick={handlePinClick} />
               </div>
-            ) : listings.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-tinta font-medium">No hay publicaciones con estos filtros</p>
-                <button onClick={reset} className="mt-3 text-sm text-accent hover:underline">Limpiar filtros</button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {listings.map((listing) => (
-                  <div key={listing.id} id={`listing-${listing.id}`}
-                    onMouseEnter={() => setHoveredId(listing.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                  >
-                    <ListingCard listing={listing} />
+              <div className="flex-1 overflow-y-auto px-4 py-4">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
                   </div>
-                ))}
+                ) : listings.length === 0 ? (
+                  <div className="text-center py-20">
+                    <p className="text-tinta font-medium">No hay publicaciones con estos filtros</p>
+                    <button onClick={reset} className="mt-3 text-sm text-accent hover:underline">Limpiar filtros</button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {listings.map((listing) => (
+                      <div key={listing.id} id={`listing-${listing.id}`}
+                        onMouseEnter={() => setHoveredId(listing.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                      >
+                        <ListingCard listing={listing} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          ) : activeNav === 'favoritos' ? (
+            <div className="flex items-center justify-center h-full text-center px-4">
+              <div>
+                <Star size={40} className="mx-auto text-muted mb-3" />
+                <p className="text-tinta font-medium">Tus favoritos</p>
+                <p className="text-sm text-sec mt-1">Guardá publicaciones como favoritas para encontrarlas rapido</p>
+              </div>
+            </div>
+          ) : activeNav === 'mis-lugares' ? (
+            <div className="overflow-y-auto h-full px-4 py-4">
+              <h2 className="text-lg font-display font-bold text-tinta mb-4">Mis lugares</h2>
+              {!user ? (
+                <p className="text-sm text-sec">Inicia sesion para ver tus publicaciones</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {listings.filter((l) => l.userId === user.id).map((listing) => (
+                    <ListingCard key={listing.id} listing={listing} />
+                  ))}
+                  {listings.filter((l) => l.userId === user.id).length === 0 && (
+                    <p className="text-sm text-sec col-span-full">No has publicado nada aun</p>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : activeNav === 'precios' ? (
+            <div className="flex items-center justify-center h-full text-center px-4">
+              <div>
+                <DollarSign size={40} className="mx-auto text-muted mb-3" />
+                <p className="text-tinta font-medium">Precios y disponibilidad</p>
+                <p className="text-sm text-sec mt-1">Administra los precios de tus publicaciones</p>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
