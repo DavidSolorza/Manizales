@@ -7,11 +7,12 @@ import MapView from '../../map/components/MapView'
 interface Props {
   onSubmit: (data: CreateListingInput) => Promise<void>
   isLoading: boolean
+  disabled?: boolean
 }
 
 type Step = 'basicos' | 'fotos' | 'ubicacion'
 
-export default function ListingForm({ onSubmit, isLoading }: Props) {
+export default function ListingForm({ onSubmit, isLoading, disabled }: Props) {
   const [step, setStep] = useState<Step>('basicos')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -176,14 +177,14 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
         ) : <div />}
         {currentStepIndex < steps.length - 1 ? (
           <button type="button" onClick={() => canGoNext() && setStep(steps[currentStepIndex + 1].key)}
-            disabled={!canGoNext()}
+            disabled={!canGoNext() || disabled}
             className="px-6 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors">
             Siguiente
           </button>
         ) : (
-          <button type="submit" disabled={isLoading || uploading}
+          <button type="submit" disabled={isLoading || uploading || disabled}
             className="px-6 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors">
-            {isLoading ? 'Publicando...' : 'Publicar'}
+            {disabled ? 'Inicia sesion para publicar' : isLoading ? 'Publicando...' : 'Publicar'}
           </button>
         )}
       </div>
