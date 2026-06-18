@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Camera, MapPin } from 'lucide-react'
 import type { CreateListingInput } from '@proyecto/api-client'
 import { apiUpload } from '@proyecto/api-client'
 import MapView from '../../map/components/MapView'
@@ -123,7 +124,7 @@ export default function ListingForm({ onSubmit, isLoading }: Props) {
         <div>
           <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-accent transition-colors bg-bg">
             <div className="text-center">
-              <p className="text-2xl text-muted mb-1">📷</p>
+              <Camera size={28} className="mx-auto text-muted mb-1" />
               <span className="text-sm text-sec">{uploading ? 'Subiendo...' : 'Click para subir fotos'}</span>
             </div>
             <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} className="hidden" />

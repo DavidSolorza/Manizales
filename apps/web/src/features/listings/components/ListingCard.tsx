@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { MapPin } from 'lucide-react'
 import type { ListingDTO } from '@proyecto/api-client'
 
 interface Props {
@@ -21,11 +22,11 @@ export default function ListingCard({ listing }: Props) {
           <h3 className="font-body font-medium text-sm text-tinta leading-snug line-clamp-1">{listing.title}</h3>
           <p className="font-body font-medium text-sm text-accent mt-1">${listing.price.toLocaleString('es-CO')}/mes</p>
           <div className="flex items-center gap-1 mt-1.5 text-xs text-sec">
-            <span>📍</span>
+            <MapPin size={12} />
             <span className="truncate">{listing.neighborhood}</span>
-            <span className="text-border mx-1">·</span>
+            <span className="text-border mx-0.5">·</span>
             <span>{listing.type}</span>
-            <span className="text-border mx-1">·</span>
+            <span className="text-border mx-0.5">·</span>
             <span>{listing.bedrooms} hab</span>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { useListingDetail, useAuth, useDeleteListing } from '@proyecto/hooks'
+import { ArrowLeft, MapPin, Trash2 } from 'lucide-react'
 import MapView from '../features/map/components/MapView'
 
 export default function ListingDetailPage() {
@@ -20,7 +21,9 @@ export default function ListingDetailPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
         <h2 className="text-xl font-display font-bold text-tinta">No encontrada</h2>
-        <Link to="/" className="text-accent hover:underline mt-4 inline-block text-sm">&larr; Volver</Link>
+        <Link to="/" className="text-accent hover:underline mt-4 inline-flex items-center gap-1 text-sm">
+          <ArrowLeft size={16} /> Volver
+        </Link>
       </div>
     )
   }
@@ -30,7 +33,9 @@ export default function ListingDetailPage() {
   return (
     <div className="min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <Link to="/" className="inline-flex items-center text-accent hover:underline mb-4 text-sm">&larr; Volver</Link>
+        <Link to="/" className="inline-flex items-center text-accent hover:underline mb-4 text-sm gap-1">
+          <ArrowLeft size={16} /> Volver
+        </Link>
         <div className="bg-surface rounded-xl border border-border overflow-hidden">
           {listing.images.length > 0 && (
             <div className="h-72 sm:h-96 overflow-hidden bg-bg">
@@ -44,14 +49,18 @@ export default function ListingDetailPage() {
                 <p className="text-lg font-bold text-accent mt-1">${listing.price.toLocaleString('es-CO')}/mes</p>
               </div>
               {isOwner && (
-                <button onClick={async () => { if (confirm('¿Eliminar?')) { await remove(listing.id); window.location.href = '/' } }}
-                  className="px-4 py-2 bg-red-400 text-white text-sm rounded-lg hover:bg-red-500 transition-colors self-start">Eliminar</button>
+                <button onClick={async () => { if (confirm('Eliminar esta publicacion?')) { await remove(listing.id); window.location.href = '/' } }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-red-400 text-white text-sm rounded-lg hover:bg-red-500 transition-colors self-start">
+                  <Trash2 size={16} /> Eliminar
+                </button>
               )}
             </div>
             <div className="flex flex-wrap gap-2 mt-4 text-xs text-sec">
               <span className="bg-bg px-3 py-1 rounded-full">{listing.type}</span>
               <span className="bg-bg px-3 py-1 rounded-full">{listing.bedrooms} hab</span>
-              <span className="bg-bg px-3 py-1 rounded-full">📍 {listing.neighborhood}</span>
+              <span className="bg-bg px-3 py-1 rounded-full inline-flex items-center gap-1">
+                <MapPin size={12} /> {listing.neighborhood}
+              </span>
             </div>
             <p className="mt-6 text-tinta leading-relaxed whitespace-pre-line text-sm">{listing.description}</p>
             <div className="mt-6 h-72 rounded-lg overflow-hidden border border-border">
